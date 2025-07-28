@@ -9,12 +9,14 @@
 {% elsif item %}
   {% assign min_qty = item.product.metafields.custom.minimum_quantity | default: 1 %}
 {% endif %}
+{% if min_qty > 1 %}
 <button type="button"
         class="double-qty-btn sf__btn sf__btn-secondary"
-        aria-label="Adaugă {{ min_qty }} de bucăți"
+        aria-label="Adaugă {{ min_qty }} bucăți"
         data-double-qty>
-    Adaugă {{ min_qty }} de bucăți
+    Adaugă {{ min_qty }} bucăți
 </button>
+{% endif %}
 
 
 
