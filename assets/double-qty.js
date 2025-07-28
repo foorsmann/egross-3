@@ -9,11 +9,16 @@
     return Math.floor((val - min) / step) * step + min;
   }
 
-  function clampAndSnap(val, step, min, max){
+  function clampAndSnap(val, step, min, max, wasAtMax){
+    var original = val;
     val = Math.min(val, max);
     if(val < min) val = min;
     if(val !== max){
-      val = snapDown(val, step, min);
+      if(wasAtMax && original === max - step && (max % step !== 0)){
+        val = snapDown(max, step, min);
+      }else{
+        val = snapDown(val, step, min);
+      }
     }
     return val;
   }
@@ -23,15 +28,18 @@
     var min = parseInt(input.min, 10) || step;
     var max = input.max ? parseInt(input.max, 10) : Infinity;
     var val = parseInt(input.value, 10);
+    var wasAtMax = input.dataset.atMax === '1';
     val = isNaN(val) ? min : val;
-    val = clampAndSnap(val, step, min, max);
+    val = clampAndSnap(val, step, min, max, wasAtMax);
     input.value = val;
     if(val >= max){
       input.classList.add('text-red-600');
       input.style.color = '#e3342f';
+      input.dataset.atMax = '1';
     }else{
       input.classList.remove('text-red-600');
       input.style.color = '';
+      input.dataset.atMax = '';
     }
     return val;
   }
@@ -84,6 +92,7 @@
       var input = findQtyInput(btn);
       if(!input) return;
       e.preventDefault();
+      e.stopImmediatePropagation();
       var delta = (btn.dataset.quantitySelector === 'increase' || btn.dataset.qtyChange === 'inc') ? 1 : -1;
       adjustQuantity(input, delta);
     }, true);
@@ -112,15 +121,18 @@
       if(val > max) val = max;
     }
 
-    var newVal = clampAndSnap(val, step, min, max);
+    var wasAtMax = input.dataset.atMax === '1';
+    var newVal = clampAndSnap(val, step, min, max, wasAtMax);
     input.value = newVal;
     // Colorare roșie la maxim
     if(newVal >= max){
       input.classList.add('text-red-600');
       input.style.color = '#e3342f';
+      input.dataset.atMax = '1';
     }else{
       input.classList.remove('text-red-600');
       input.style.color = '';
+      input.dataset.atMax = '';
     }
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
