@@ -32,9 +32,12 @@
     document.querySelectorAll('[data-min-qty]').forEach(function(input){
       var min = parseInt(input.getAttribute('data-min-qty'), 10);
       if(min && min > 0){
-        input.value = min;
         input.min = min;
         input.step = min;
+        if(parseInt(input.value,10) < min){
+          input.value = min;
+        }
+        validateAndHighlightQty(input);
       }
     });
   }
@@ -48,6 +51,7 @@
     if(newVal < min) newVal = min;
     if(newVal > max) newVal = max;
     input.value = newVal;
+    // Colorare roșie la maxim
     if(newVal >= max){
       input.classList.add('text-red-600');
       input.style.color = '#e3342f';
@@ -123,6 +127,7 @@
   // Expune global pentru debugging manual
   window.doubleQtyInit = initDoubleQtyButtons;
 })();
+
 
 
 

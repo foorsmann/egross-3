@@ -9134,7 +9134,7 @@ _defineProperty(this, "updateBySelectedVariant", variant => {
   if (quantityInput && variant) {
     quantityInput.max = variant.inventory_quantity ?? '';
 
-    // Dacă valoarea din input depășește noul max, limitează și colorează cu roșu
+    // Validare și highlight roșu dacă inputul depășește noul max
     if (Number(quantityInput.value) > Number(quantityInput.max)) {
       quantityInput.value = quantityInput.max;
       quantityInput.classList.add('text-red-600');
@@ -9145,38 +9145,7 @@ _defineProperty(this, "updateBySelectedVariant", variant => {
     }
   }
 
-  if (variant) {
-    if (variant.id !== this.productData.current_variant_id) {
-      this.updateOptionByVariant(variant);
-      this.updatePriceByVariant(variant);
-      this.updateStockCountdownByVariant(variant);
-      this.updateSkuByVariant(variant);
-      this.updateAvailabilityByVariant(variant);
-      this.updateBrowserHistory(variant);
-      this.hideSoldoutAndUnavailableOptions(variant);
-      this.updateProductCardSoldOutBadge(variant);
-      this.productData.current_variant_id = variant.id;
-      this.changeProductImage(variant);
-    }
-  }
-});
-
-const { quantityInput } = this.domNodes;
-if (quantityInput && variant) {
-  quantityInput.max = variant.inventory_quantity ?? '';
-  // Validare și highlight roșu dacă este cazul
-  if (Number(quantityInput.value) > Number(quantityInput.max)) {
-    quantityInput.value = quantityInput.max;
-    quantityInput.classList.add('text-red-600');
-    quantityInput.style.color = '#e3342f';
-  } else {
-    quantityInput.classList.remove('text-red-600');
-    quantityInput.style.color = '';
-  }
-}
-
-if (variant) {
-  if (variant.id !== this.productData.current_variant_id) {
+  if (variant && variant.id !== this.productData.current_variant_id) {
     this.updateOptionByVariant(variant);
     this.updatePriceByVariant(variant);
     this.updateStockCountdownByVariant(variant);
@@ -9188,17 +9157,16 @@ if (variant) {
     this.productData.current_variant_id = variant.id;
     this.changeProductImage(variant);
   }
-}
 
+  product_ConceptSGMEvents.emit(`${this.productData.id}__VARIANT_CHANGE`, variant, this);
+});
 
-      product_ConceptSGMEvents.emit(`${this.productData.id}__VARIANT_CHANGE`, variant, this); // window?.DoublyGlobalCurrency?.convertAll?.($?.('[name=doubly-currencies]')?.val?.());
-    });
+_defineProperty(this, "updateProductCardSoldOutBadge", variant => {
+  if (this.view === "card" && this.domNodes.soldOutBadge) {
+    this.domNodes.soldOutBadge.style.display = variant.available ? 'none' : 'flex';
+  }
+});
 
-    _defineProperty(this, "updateProductCardSoldOutBadge", variant => {
-      if (this.view === "card" && this.domNodes.soldOutBadge) {
-        this.domNodes.soldOutBadge.style.display = variant.available ? 'none' : 'flex';
-      }
-    });
 
     _defineProperty(this, "updateOptionByVariant", variant => {
       Object.values(this.activeOptionNodeByPosition).forEach(optNode => this.toggleOptionNodeActive(optNode, false));
