@@ -8693,127 +8693,164 @@ class Product {
       }
     });
 
-    _defineProperty(this, "initOptions", () => {
-      const {
-        _colorSwatches = [],
-        _imageSwatches = []
-      } = product_ConceptSGMSettings;
-      this.domNodes.optionNodes.forEach(optNode => {
-        const {
-          optionType,
-          optionPosition,
-          value: optionValue
-        } = optNode?.dataset;
-        const optionValueLowerCase = optionValue?.toLowerCase();
-        const variantToShowSwatchImage = this.productData.variants.find(v => v[`option${optionPosition}`] === optionValue);
-        const variantImage = variantToShowSwatchImage?.featured_image?.src ? getSizedImageUrl(variantToShowSwatchImage?.featured_image?.src, '150x') : '';
-        const customImage = _imageSwatches.find(i => i.key === optionValueLowerCase)?.value;
-        const customColor = _colorSwatches.find(c => c.key === optionValueLowerCase)?.value; // if (variantImage || customImage) optNode.classList.add('has-bg-img')
+_defineProperty(this, "initOptions", () => {
+  const {
+    _colorSwatches = [],
+    _imageSwatches = []
+  } = product_ConceptSGMSettings;
+  this.domNodes.optionNodes.forEach(optNode => {
+    const {
+      optionType,
+      optionPosition,
+      value: optionValue
+    } = optNode?.dataset;
+    const optionValueLowerCase = optionValue?.toLowerCase();
+    const variantToShowSwatchImage = this.productData.variants.find(v => v[`option${optionPosition}`] === optionValue);
+    const variantImage = variantToShowSwatchImage?.featured_image?.src ? getSizedImageUrl(variantToShowSwatchImage?.featured_image?.src, '150x') : '';
+    const customImage = _imageSwatches.find(i => i.key === optionValueLowerCase)?.value;
+    const customColor = _colorSwatches.find(c => c.key === optionValueLowerCase)?.value; // if (variantImage || customImage) optNode.classList.add('has-bg-img')
 
-        switch (optionType) {
-          case 'default':
-            optNode.style.backgroundImage = `url(${customImage || variantImage || ''})`;
-            break;
+    switch (optionType) {
+      case 'default':
+        optNode.style.backgroundImage = `url(${customImage || variantImage || ''})`;
+        break;
 
-          case 'image':
-            optNode.style.backgroundImage = `url(${variantImage || customImage || ''})`;
-            break;
+      case 'image':
+        optNode.style.backgroundImage = `url(${variantImage || customImage || ''})`;
+        break;
 
-          case 'color':
-            optNode.textContent = optionValueLowerCase;
-            optNode.style.backgroundColor = customColor ? customColor : optionValueLowerCase;
-            customImage && (optNode.style.backgroundImage = `url(${customImage})`);
-            break;
+      case 'color':
+        optNode.textContent = optionValueLowerCase;
+        optNode.style.backgroundColor = customColor ? customColor : optionValueLowerCase;
+        customImage && (optNode.style.backgroundImage = `url(${customImage})`);
+        break;
 
-          default:
-            break;
-        }
-      });
-    });
+      default:
+        break;
+    }
+  });
+});
 
-    _defineProperty(this, "initProductEvents", async () => {
-      // this.domNodes.variantDropdown?.addEventListener('change', this.handleSelectVariant)
-      const listeners = [(0,events/* addEventDelegate */.X)({
-        event: 'change',
-        context: this.productForm,
-        selector: this.selectors.variantDropdown,
-        handler: this.handleSelectVariant
-      }), (0,events/* addEventDelegate */.X)({
-        context: this.productForm,
-        selector: this.selectors.optionNodes[0],
-        handler: this.handleSelectVariant
-      }), (0,events/* addEventDelegate */.X)({
-        context: this.productForm,
-        selector: this.selectors.addToCart,
-        handler: this.handleAddToCart
-      })];
+_defineProperty(this, "initProductEvents", async () => {
+  // this.domNodes.variantDropdown?.addEventListener('change', this.handleSelectVariant)
+  const listeners = [
+    (0,events/* addEventDelegate */.X)({
+      event: 'change',
+      context: this.productForm,
+      selector: this.selectors.variantDropdown,
+      handler: this.handleSelectVariant
+    }),
+    (0,events/* addEventDelegate */.X)({
+      context: this.productForm,
+      selector: this.selectors.optionNodes[0],
+      handler: this.handleSelectVariant
+    }),
+    (0,events/* addEventDelegate */.X)({
+      context: this.productForm,
+      selector: this.selectors.addToCart,
+      handler: this.handleAddToCart
+    })
+  ];
 
-      // Avoid duplicate increments when the theme's <quantity-input> handles
-      // the buttons. Only attach our handler if that element is missing.
-      if (!this.productForm.querySelector('quantity-input')) {
-        listeners.push((0,events/* addEventDelegate */.X)({
-          context: this.productForm,
-          selector: this.selectors.quantityBtns[0],
-          handler: this.handleQtyBtnClick
-        }));
+  // Adaugă handler pentru butoane de quantity DOAR dacă nu există <quantity-input> custom (evităm duplicare)
+  if (
+    !this.productForm.querySelector('quantity-input') &&
+    !(window.customElements && window.customElements.get('quantity-input'))
+  ) {
+    listeners.push((0,events/* addEventDelegate */.X)({
+      context: this.productForm,
+      selector: this.selectors.quantityBtns[0],
+      handler: this.handleQtyBtnClick
+    }));
+  }
+
+  // Handler pentru inputul de quantity (change = merge pentru input și la + / -)
+  listeners.push((0,events/* addEventDelegate */.X)({
+    event: 'change',
+    context: this.productForm,
+    selector: this.selectors.quantityInput,
+    handler: this.handleQtyInputChange
+  }));
+
+  this.listeners = listeners;
+  const {
+    dynamicCheckout
+  } = this.domNodes;
+
+  if (dynamicCheckout && this.hasCustomRequiredFields) {
+    dynamicCheckout.addEventListener('click', e => {
+      const missing = productFormCheck(this.productForm);
+
+      if (missing.length > 0) {
+        e.stopPropagation();
+        modules_product_ConceptSGMTheme.Notification.show({
+          target: this.domNodes.error,
+          method: 'appendChild',
+          type: 'warning',
+          message: product_ConceptSGMStrings.requiredField,
+          delay: 100
+        });
+        console.warn('Missing field(s): ', missing);
       }
+    }, true);
+  }
+});
 
-      listeners.push((0,events/* addEventDelegate */.X)({
-        event: 'input',
-        context: this.productForm,
-        selector: this.selectors.quantityInput,
-        handler: this.handleQtyInputChange
-      }));
+_defineProperty(this, "unsubscribeEvents", () => {
+  this.listeners.forEach(unsubscribeFunc => unsubscribeFunc());
+});
 
-      this.listeners = listeners;
-      const {
-        dynamicCheckout
-      } = this.domNodes;
+_defineProperty(this, "handleQtyInputChange", e => {
+  const input = e.target;
+  const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+  const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
+  let val = Number(input.value) || step;
 
-      if (dynamicCheckout && this.hasCustomRequiredFields) {
-        dynamicCheckout.addEventListener('click', e => {
-          const missing = productFormCheck(this.productForm);
+  if (val < step) val = step;
+  if (val > max) val = max;
+  input.value = val;
 
-          if (missing.length > 0) {
-            e.stopPropagation();
-            modules_product_ConceptSGMTheme.Notification.show({
-              target: this.domNodes.error,
-              method: 'appendChild',
-              type: 'warning',
-              message: product_ConceptSGMStrings.requiredField,
-              delay: 100
-            });
-            console.warn('Missing field(s): ', missing);
-          }
-        }, true);
-      }
-    });
+  // Colorare roșie la maxim
+  if (val >= max) {
+    input.classList.add('text-red-600');
+    input.style.color = '#e3342f';
+  } else {
+    input.classList.remove('text-red-600');
+    input.style.color = '';
+  }
 
-    _defineProperty(this, "unsubscribeEvents", () => {
-      this.listeners.forEach(unsubscribeFunc => unsubscribeFunc());
-    });
+  // Validare custom dacă există funcția globală
+  const valid = window.validateAndHighlightQty ? window.validateAndHighlightQty(input) : val;
+  product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, valid, this);
+});
 
-    _defineProperty(this, "handleQtyInputChange", e => {
-      const input = e.target;
-      const val = window.validateAndHighlightQty ? window.validateAndHighlightQty(input) : Number(input.value);
-      product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, val, this);
-    });
+_defineProperty(this, "handleQtyBtnClick", (e, btn) => {
+  const { quantitySelector } = btn.dataset;
+  const { quantityInput } = this.domNodes;
+  const step = Number(quantityInput.getAttribute('data-min-qty')) || Number(quantityInput.step) || 1;
+  const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
+  const min = step;
+  const currentQty = Number(quantityInput.value) || min;
 
-    _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
-      const {
-        quantitySelector
-      } = btn.dataset;
-      const {
-        quantityInput
-      } = this.domNodes;
-      const step = Number(quantityInput.getAttribute('data-min-qty')) || Number(quantityInput.step) || 1;
-      const min = step;
-      const currentQty = Number(quantityInput.value) || min;
-      let newQty = quantitySelector === 'decrease' ? currentQty - step : currentQty + step;
-      quantityInput.value = newQty;
-      const valid = window.validateAndHighlightQty ? window.validateAndHighlightQty(quantityInput) : newQty;
-      product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, valid, this);
-    });
+  let newQty = quantitySelector === 'decrease' ? currentQty - step : currentQty + step;
+  if (newQty < min) newQty = min;
+  if (newQty > max) newQty = max;
+
+  quantityInput.value = newQty;
+
+  // Colorare roșie la maxim
+  if (newQty >= max) {
+    quantityInput.classList.add('text-red-600');
+    quantityInput.style.color = '#e3342f';
+  } else {
+    quantityInput.classList.remove('text-red-600');
+    quantityInput.style.color = '';
+  }
+
+  // Validare custom dacă există funcția globală
+  const valid = window.validateAndHighlightQty ? window.validateAndHighlightQty(quantityInput) : newQty;
+  product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, valid, this);
+});
 
     _defineProperty(this, "getVariantFromActiveOptions", () => {
       const {
@@ -9097,40 +9134,87 @@ class Product {
       }
     });
 
-    _defineProperty(this, "updateBySelectedVariant", variant => {
-      this.updateATCButtonByVariant(variant);
+_defineProperty(this, "updateBySelectedVariant", variant => {
+  this.updateATCButtonByVariant(variant);
 
-      const { quantityInput } = this.domNodes;
-      if (quantityInput && variant) {
-        quantityInput.max = variant.inventory_quantity ?? '';
-        if (window.validateAndHighlightQty) {
-          window.validateAndHighlightQty(quantityInput);
-        }
-      }
+  const { quantityInput } = this.domNodes;
+  if (quantityInput && variant) {
+    quantityInput.max = variant.inventory_quantity ?? '';
 
-      if (variant) {
-        if (variant.id !== this.productData.current_variant_id) {
-          this.updateOptionByVariant(variant);
-          this.updatePriceByVariant(variant);
-          this.updateStockCountdownByVariant(variant);
-          this.updateSkuByVariant(variant);
-          this.updateAvailabilityByVariant(variant);
-          this.updateBrowserHistory(variant);
-          this.hideSoldoutAndUnavailableOptions(variant);
-          this.updateProductCardSoldOutBadge(variant);
-          this.productData.current_variant_id = variant.id;
-          this.changeProductImage(variant);
-        }
-      }
+    // Validează și evidențiază corect input-ul
+    if (window.validateAndHighlightQty) {
+      window.validateAndHighlightQty(quantityInput);
+    }
 
-      product_ConceptSGMEvents.emit(`${this.productData.id}__VARIANT_CHANGE`, variant, this); // window?.DoublyGlobalCurrency?.convertAll?.($?.('[name=doubly-currencies]')?.val?.());
-    });
+    // Colorare și ajustare valoare dacă depășește noul max
+    if (Number(quantityInput.value) > Number(quantityInput.max)) {
+      quantityInput.value = quantityInput.max;
+      quantityInput.classList.add('text-red-600');
+      quantityInput.style.color = '#e3342f';
+    } else {
+      quantityInput.classList.remove('text-red-600');
+      quantityInput.style.color = '';
+    }
+  }
 
-    _defineProperty(this, "updateProductCardSoldOutBadge", variant => {
-      if (this.view === "card" && this.domNodes.soldOutBadge) {
-        this.domNodes.soldOutBadge.style.display = variant.available ? 'none' : 'flex';
-      }
-    });
+  if (variant) {
+    if (variant.id !== this.productData.current_variant_id) {
+      this.updateOptionByVariant(variant);
+      this.updatePriceByVariant(variant);
+      this.updateStockCountdownByVariant(variant);
+      this.updateSkuByVariant(variant);
+      this.updateAvailabilityByVariant(variant);
+      this.updateBrowserHistory(variant);
+      this.hideSoldoutAndUnavailableOptions(variant);
+      this.updateProductCardSoldOutBadge(variant);
+      this.productData.current_variant_id = variant.id;
+      this.changeProductImage(variant);
+    }
+  }
+});
+
+
+  if (variant) {
+    if (variant.id !== this.productData.current_variant_id) {
+      this.updateOptionByVariant(variant);
+      this.updatePriceByVariant(variant);
+      this.updateStockCountdownByVariant(variant);
+      this.updateSkuByVariant(variant);
+      this.updateAvailabilityByVariant(variant);
+      this.updateBrowserHistory(variant);
+      this.hideSoldoutAndUnavailableOptions(variant);
+      this.updateProductCardSoldOutBadge(variant);
+      this.productData.current_variant_id = variant.id;
+      this.changeProductImage(variant);
+    }
+  }
+
+  product_ConceptSGMEvents.emit(`${this.productData.id}__VARIANT_CHANGE`, variant, this);
+});
+
+
+  if (variant && variant.id !== this.productData.current_variant_id) {
+    this.updateOptionByVariant(variant);
+    this.updatePriceByVariant(variant);
+    this.updateStockCountdownByVariant(variant);
+    this.updateSkuByVariant(variant);
+    this.updateAvailabilityByVariant(variant);
+    this.updateBrowserHistory(variant);
+    this.hideSoldoutAndUnavailableOptions(variant);
+    this.updateProductCardSoldOutBadge(variant);
+    this.productData.current_variant_id = variant.id;
+    this.changeProductImage(variant);
+  }
+
+  product_ConceptSGMEvents.emit(`${this.productData.id}__VARIANT_CHANGE`, variant, this);
+});
+
+_defineProperty(this, "updateProductCardSoldOutBadge", variant => {
+  if (this.view === "card" && this.domNodes.soldOutBadge) {
+    this.domNodes.soldOutBadge.style.display = variant.available ? 'none' : 'flex';
+  }
+});
+
 
     _defineProperty(this, "updateOptionByVariant", variant => {
       Object.values(this.activeOptionNodeByPosition).forEach(optNode => this.toggleOptionNodeActive(optNode, false));

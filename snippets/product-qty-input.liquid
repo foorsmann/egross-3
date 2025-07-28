@@ -40,13 +40,14 @@
   {%- if show_double_qty_btn != false -%}
     {%- assign min_qty = product.metafields.custom.minimum_quantity | default: 1 -%}
     {%- if min_qty > 1 or request.design_mode -%}
-    <button type="button"
-        class="double-qty-btn sf__btn sf__btn-secondary flex-1 max-w-[160px]"
-        aria-label="Adaugă {{ min_qty }} bucăți"
-        data-double-qty{% if request.design_mode %} disabled{% endif %}>
-        Adaugă {{ min_qty }} bucăți
-    </button>
+      <button type="button"
+          class="double-qty-btn sf__btn sf__btn-secondary flex-1 max-w-[160px]"
+          aria-label="Adaugă {{ min_qty }} bucăți"
+          data-double-qty{% if request.design_mode %} disabled{% endif %}>
+          Adaugă {{ min_qty }} bucăți
+      </button>
     {%- endif -%}
   {%- endif -%}
 </div>
+
 

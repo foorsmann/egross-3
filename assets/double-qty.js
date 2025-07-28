@@ -22,6 +22,7 @@
     return val;
   }
   window.validateAndHighlightQty = validateAndHighlightQty;
+
   // Configurări
   var BUTTON_CLASS = 'double-qty-btn';
   var LABEL_PREFIX = 'Adaugă ';
@@ -45,9 +46,20 @@
   function adjustQuantity(input, delta){
     var step = parseInt(input.getAttribute('data-min-qty'), 10) || 1;
     var min = parseInt(input.min, 10) || step;
+    var max = input.max ? parseInt(input.max, 10) : Infinity;
     var val = parseInt(input.value, 10) || min;
-    input.value = val + delta * step;
-    validateAndHighlightQty(input);
+    var newVal = val + delta * step;
+    if(newVal < min) newVal = min;
+    if(newVal > max) newVal = max;
+    input.value = newVal;
+    // Colorare roșie la maxim
+    if(newVal >= max){
+      input.classList.add('text-red-600');
+      input.style.color = '#e3342f';
+    }else{
+      input.classList.remove('text-red-600');
+      input.style.color = '';
+    }
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
   }
@@ -102,8 +114,8 @@
   }
 
   // Rulează la pageload și la re-render (dacă ai AJAX sau Shopify section load)
-  // Evenimentele pentru butoanele +/- sunt gestionate de tema de bază, astfel
-  // evităm să adăugăm listener-ele noastre și să dublăm pasul la click.
+  // Nu mai atașăm handler-ele proprii pe butoanele +/- deoarece tema deja
+  // gestionează aceste evenimente. Astfel evităm dublarea pasului la click.
   function initAll(){
     applyMinQty();
     initDoubleQtyButtons();
@@ -116,6 +128,9 @@
   // Expune global pentru debugging manual
   window.doubleQtyInit = initDoubleQtyButtons;
 })();
+
+
+
 
 
 
