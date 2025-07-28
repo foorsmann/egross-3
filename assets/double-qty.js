@@ -6,7 +6,7 @@
   // Configurări
   var BUTTON_CLASS = 'double-qty-btn';
   var LABEL_PREFIX = 'Adaugă ';
-  var LABEL_SUFFIX = ' de bucăți';
+  var LABEL_SUFFIX = ' bucăți';
 
   // Setează valoarea minimă definită în data-min-qty
   function applyMinQty(){
@@ -81,7 +81,14 @@
     });
   }
 
+  // Attach increment/decrement handlers only if the theme doesn't provide its own
+  // quantity-input custom element. Previously both scripts ran and doubled the
+  // step value on each click.
   function initQuantityButtons(){
+    if(window.customElements && window.customElements.get('quantity-input')){
+      // Theme already handles quantity buttons; avoid duplicate increments
+      return;
+    }
     document.querySelectorAll('[data-quantity-selector="increase"]').forEach(function(btn){
       if(btn.dataset.stepApplied) return;
       btn.dataset.stepApplied = '1';
