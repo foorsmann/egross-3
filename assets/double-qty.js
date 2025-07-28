@@ -80,12 +80,13 @@
     document.addEventListener('click', function(e){
       var btn = e.target.closest('[data-quantity-selector],[data-qty-change]');
       if(!btn) return;
-      var container = btn.closest('.quantity-input') || btn.parentNode;
-      var input = container.querySelector('input[type="number"]');
-      if(input){
-        setTimeout(function(){ validateAndHighlightQty(input); }, 0);
-      }
-    });
+      if(btn.closest('.scd-item') || btn.closest('[data-cart-item]')) return;
+      var input = findQtyInput(btn);
+      if(!input) return;
+      e.preventDefault();
+      var delta = (btn.dataset.quantitySelector === 'increase' || btn.dataset.qtyChange === 'inc') ? 1 : -1;
+      adjustQuantity(input, delta);
+    }, true);
   }
 
   function adjustQuantity(input, delta){
