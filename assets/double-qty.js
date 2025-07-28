@@ -80,24 +80,25 @@
     });
   }
 
-  // Asigură highlight corect când se folosesc butoanele +/- existente în temă
-  var qtyBtnListenerAdded = false;
-  function attachQtyButtonListeners(){
-    if(qtyBtnListenerAdded) return;
-    qtyBtnListenerAdded = true;
-    document.addEventListener('click', function(e){
-      var btn = e.target.closest('[data-quantity-selector],[data-qty-change]');
-      if(!btn) return;
-      if(btn.closest('.scd-item') || btn.closest('[data-cart-item]')) return;
-      var input = findQtyInput(btn);
-      if(!input) return;
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      var delta = (btn.dataset.quantitySelector === 'increase' || btn.dataset.qtyChange === 'inc') ? 1 : -1;
-      adjustQuantity(input, delta);
-    }, true);
-  }
+// Asigură highlight corect când se folosesc butoanele +/- existente în temă
+var qtyBtnListenerAdded = false;
+function attachQtyButtonListeners(){
+  if(qtyBtnListenerAdded) return;
+  qtyBtnListenerAdded = true;
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-quantity-selector],[data-qty-change]');
+    if(!btn) return;
+    if(btn.closest('.scd-item') || btn.closest('[data-cart-item]')) return;
+    var input = findQtyInput(btn);
+    if(!input) return;
+    e.preventDefault();
+    // dacă ai buguri de dublu handler, decomentează liniile de mai jos:
+    // e.stopPropagation();
+    // e.stopImmediatePropagation();
+    var delta = (btn.dataset.quantitySelector === 'increase' || btn.dataset.qtyChange === 'inc') ? 1 : -1;
+    adjustQuantity(input, delta);
+  }, true);
+}
 
   function adjustQuantity(input, delta){
     var step = parseInt(input.getAttribute('data-min-qty'), 10) || 1;
