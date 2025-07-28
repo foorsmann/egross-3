@@ -9,7 +9,7 @@
 {% elsif item %}
   {% assign min_qty = item.product.metafields.custom.minimum_quantity | default: 1 %}
 {% endif %}
-{% if min_qty > 1 %}
+{% if min_qty > 1 or request.design_mode %}
 <button type="button"
         class="double-qty-btn sf__btn sf__btn-secondary"
         aria-label="Adaugă {{ min_qty }} bucăți"
