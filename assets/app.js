@@ -8854,26 +8854,41 @@ _defineProperty(this, "unsubscribeEvents", () => {
 _defineProperty(this, "handleQtyInputChange", e => {
   const input = e.target;
   const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+  const min = Number(input.min) || step;
   const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
-  let val = Number(input.value) || step;
+  const wasAtMax = input.dataset.atMax === '1';
+  let val = Number(input.value) || min;
 
-  const snapDown = v => {
-    if (v < step) return step;
-    return Math.floor((v - step) / step) * step + step;
+  const snapDown = (v, s = step, m = min) => {
+    if (v < m) return m;
+    return Math.floor((v - m) / s) * s + m;
   };
 
-  if (val > max) val = max;
-  if (val !== max) val = snapDown(val);
-  if (val < step) val = step;
+  const clampAndSnap = (v) => {
+    const original = v;
+    v = Math.min(v, max);
+    if (v < min) v = min;
+    if (v !== max) {
+      if (wasAtMax && original === max - step && max % step !== 0) {
+        v = snapDown(max);
+      } else {
+        v = snapDown(v);
+      }
+    }
+    return v;
+  };
+
+  val = clampAndSnap(val);
   input.value = val;
 
-  // Colorare roșie la maxim
   if (val >= max) {
     input.classList.add('text-red-600');
     input.style.color = '#e3342f';
+    input.dataset.atMax = '1';
   } else {
     input.classList.remove('text-red-600');
     input.style.color = '';
+    input.dataset.atMax = '';
   }
 
   product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, val, this);
@@ -8883,14 +8898,29 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   const { quantitySelector } = btn.dataset;
   const { quantityInput } = this.domNodes;
   const step = Number(quantityInput.getAttribute('data-min-qty')) || Number(quantityInput.step) || 1;
+  const min = Number(quantityInput.min) || step;
   const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
-  const min = step;
+  const wasAtMax = quantityInput.dataset.atMax === '1';
   const currentQty = Number(quantityInput.value) || min;
   let newQty = currentQty;
 
-  const snapDown = v => {
-    if (v < min) return min;
-    return Math.floor((v - min) / step) * step + min;
+  const snapDown = (v, s = step, m = min) => {
+    if (v < m) return m;
+    return Math.floor((v - m) / s) * s + m;
+  };
+
+  const clampAndSnap = v => {
+    const original = v;
+    v = Math.min(v, max);
+    if (v < min) v = min;
+    if (v !== max) {
+      if (wasAtMax && original === max - step && max % step !== 0) {
+        v = snapDown(max);
+      } else {
+        v = snapDown(v);
+      }
+    }
+    return v;
   };
 
   if (quantitySelector === 'decrease') {
@@ -8906,19 +8936,21 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
     if (currentQty % step !== 0) {
       newQty = snapDown(currentQty);
     }
-    newQty = newQty + step;
+    newQty += step;
     if (newQty > max) newQty = max;
   }
 
+  newQty = clampAndSnap(newQty);
   quantityInput.value = newQty;
 
-  // Colorare roșie la maxim
   if (newQty >= max) {
     quantityInput.classList.add('text-red-600');
     quantityInput.style.color = '#e3342f';
+    quantityInput.dataset.atMax = '1';
   } else {
     quantityInput.classList.remove('text-red-600');
     quantityInput.style.color = '';
+    quantityInput.dataset.atMax = '';
   }
 
   product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, newQty, this);
