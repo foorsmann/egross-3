@@ -125,8 +125,8 @@
         "enable_video_autoplay": false,
         "show_nav_media_mobile": false,
         "show_pagination_mobile": true,
-        "use_sticky_atc": false,
-        "use_sticky_atc_on_mobile": false,
+        "use_sticky_atc": true,
+        "use_sticky_atc_on_mobile": true,
         "enable_dynamic_checkout": false,
         "sticky_atc_wishtlist": false,
         "sticky_atc_compare": false
