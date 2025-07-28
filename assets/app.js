@@ -7390,10 +7390,28 @@ class Cart {
         const item = this.getCartItemByKey(id);
 
         if (item) {
-          let {
-            quantity
-          } = item;
-          quantity += qtyChange === 'dec' ? -1 : +1;
+          const input = btn.parentElement.querySelector(this.cartItemSelectors.qtyInput);
+          const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+          const max = Number(input.max) || Infinity;
+          let quantity = Number(input.value) || step;
+
+          if (qtyChange === 'dec') {
+            quantity -= step;
+            if (quantity < step) quantity = step;
+          } else {
+            quantity += step;
+            if (quantity > max) quantity = max;
+          }
+
+          input.value = quantity;
+          if (quantity >= max) {
+            input.classList.add('text-red-600');
+            input.style.color = '#e3342f';
+          } else {
+            input.classList.remove('text-red-600');
+            input.style.color = '';
+          }
+
           this.changeItemQty({
             id,
             quantity
@@ -7409,10 +7427,20 @@ class Cart {
       selector: this.cartItemSelectors.qtyInput,
       handler: (e, input) => {
         e.preventDefault();
-        const {
-          id
-        } = input.dataset;
-        const quantity = Number(input.value);
+        const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+        const max = Number(input.max) || Infinity;
+        let quantity = Number(input.value) || step;
+        if (quantity < step) quantity = step;
+        if (quantity > max) quantity = max;
+        input.value = quantity;
+        if (quantity >= max) {
+          input.classList.add('text-red-600');
+          input.style.color = '#e3342f';
+        } else {
+          input.classList.remove('text-red-600');
+          input.style.color = '';
+        }
+        const { id } = input.dataset;
         this.changeItemQty({
           id,
           quantity

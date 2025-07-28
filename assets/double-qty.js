@@ -48,8 +48,11 @@
     document.querySelectorAll(selectors).forEach(function(input){
       if(input.dataset.qtyListener) return;
       input.dataset.qtyListener = '1';
-      ['input','change'].forEach(function(ev){
+      ['input','change','blur'].forEach(function(ev){
         input.addEventListener(ev, function(){ validateAndHighlightQty(input); });
+      });
+      input.addEventListener('keypress', function(e){
+        if(e.key === 'Enter'){ validateAndHighlightQty(input); }
       });
       validateAndHighlightQty(input);
     });
