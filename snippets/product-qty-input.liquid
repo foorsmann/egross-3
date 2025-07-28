@@ -17,6 +17,8 @@
         name="quantity"
         value="{{ product.metafields.custom.minimum_quantity | default: 1 }}"
         min="{{ product.metafields.custom.minimum_quantity | default: 1 }}"
+        max="{{ product.selected_or_first_available_variant.inventory_quantity }}"
+        step="{{ product.metafields.custom.minimum_quantity | default: 1 }}"
         aria-label="{{ 'products.product.product_quantity' | t }}"
         data-quantity-input
         data-min-qty="{{ product.metafields.custom.minimum_quantity | default: 1 }}"

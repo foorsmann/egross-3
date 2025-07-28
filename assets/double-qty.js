@@ -3,6 +3,25 @@
 // Asigură funcționalitatea butonului care adaugă cantitatea minimă (pasul minim) pe orice element cu clasa .double-qty-btn existent în pagină
 
 (function(){
+  // Funcție comună pentru validare și highlight roșu la atingerea stocului
+  function validateAndHighlightQty(input){
+    var step = parseInt(input.getAttribute('data-min-qty'), 10) || parseInt(input.step,10) || 1;
+    var min = parseInt(input.min, 10) || step;
+    var max = input.max ? parseInt(input.max, 10) : Infinity;
+    var val = parseInt(input.value, 10) || min;
+    if(val < min) val = min;
+    if(val > max) val = max;
+    input.value = val;
+    if(val >= max){
+      input.classList.add('text-red-600');
+      input.style.color = '#e3342f';
+    }else{
+      input.classList.remove('text-red-600');
+      input.style.color = '';
+    }
+    return val;
+  }
+  window.validateAndHighlightQty = validateAndHighlightQty;
   // Configurări
   var BUTTON_CLASS = 'double-qty-btn';
   var LABEL_PREFIX = 'Adaugă ';
@@ -29,7 +48,13 @@
     if(newVal < min) newVal = min;
     if(newVal > max) newVal = max;
     input.value = newVal;
-    input.style.color = newVal >= max ? '#e3342f' : '';
+    if(newVal >= max){
+      input.classList.add('text-red-600');
+      input.style.color = '#e3342f';
+    }else{
+      input.classList.remove('text-red-600');
+      input.style.color = '';
+    }
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
   }
@@ -66,7 +91,7 @@
         var max = input.max ? parseInt(input.max, 10) : 9999;
         var val = parseInt(input.value, 10) || 1;
         btn.disabled = val >= max;
-        input.style.color = val >= max ? '#e3342f' : '';
+        validateAndHighlightQty(input);
       }
       updateBtnState();
       input.addEventListener('input', updateBtnState);
@@ -83,39 +108,7 @@
     });
   }
 
-  // Attach increment/decrement handlers only if the theme doesn't provide its own
-  // quantity-input custom element. Previously both scripts ran and doubled the
-  // step value on each click.
-  function initQuantityButtons(){
-    if(window.customElements && window.customElements.get('quantity-input')){
-      // Theme already handles quantity buttons; avoid duplicate increments
-      return;
-    }
-    document.querySelectorAll('[data-quantity-selector="increase"]').forEach(function(btn){
-      if(btn.dataset.stepApplied) return;
-      btn.dataset.stepApplied = '1';
-      var input = findQtyInput(btn);
-      if(!input) return;
-      btn.addEventListener('click', function(e){
-        e.preventDefault();
-        adjustQuantity(input, 1);
-      });
-    });
-    document.querySelectorAll('[data-quantity-selector="decrease"]').forEach(function(btn){
-      if(btn.dataset.stepApplied) return;
-      btn.dataset.stepApplied = '1';
-      var input = findQtyInput(btn);
-      if(!input) return;
-      btn.addEventListener('click', function(e){
-        e.preventDefault();
-        adjustQuantity(input, -1);
-      });
-    });
-  }
-
   // Rulează la pageload și la re-render (dacă ai AJAX sau Shopify section load)
-  // Nu mai atașăm handler-ele proprii pe butoanele +/- deoarece tema deja
-  // gestionează aceste evenimente. Astfel evităm dublarea pasului la click.
   function initAll(){
     applyMinQty();
     initDoubleQtyButtons();
@@ -128,6 +121,7 @@
   // Expune global pentru debugging manual
   window.doubleQtyInit = initDoubleQtyButtons;
 })();
+
 
 
 

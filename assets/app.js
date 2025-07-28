@@ -8733,7 +8733,7 @@ class Product {
 
     _defineProperty(this, "initProductEvents", async () => {
       // this.domNodes.variantDropdown?.addEventListener('change', this.handleSelectVariant)
-      this.listeners = [(0,events/* addEventDelegate */.X)({
+      const listeners = [(0,events/* addEventDelegate */.X)({
         event: 'change',
         context: this.productForm,
         selector: this.selectors.variantDropdown,
@@ -8746,16 +8746,24 @@ class Product {
         context: this.productForm,
         selector: this.selectors.addToCart,
         handler: this.handleAddToCart
-      }), (0,events/* addEventDelegate */.X)({
-        context: this.productForm,
-        selector: this.selectors.quantityBtns[0],
-        handler: this.handleQtyBtnClick
-      }), (0,events/* addEventDelegate */.X)({
+      })];
+
+      if (!(window.customElements && window.customElements.get('quantity-input'))){
+        listeners.push((0,events/* addEventDelegate */.X)({
+          context: this.productForm,
+          selector: this.selectors.quantityBtns[0],
+          handler: this.handleQtyBtnClick
+        }));
+      }
+
+      listeners.push((0,events/* addEventDelegate */.X)({
         event: 'change',
         context: this.productForm,
         selector: this.selectors.quantityInput,
         handler: this.handleQtyInputChange
-      })];
+      }));
+
+      this.listeners = listeners;
       const {
         dynamicCheckout
       } = this.domNodes;
@@ -8779,47 +8787,62 @@ class Product {
       }
     });
 
-    _defineProperty(this, "unsubscribeEvents", () => {
-      this.listeners.forEach(unsubscribeFunc => unsubscribeFunc());
-    });
+_defineProperty(this, "unsubscribeEvents", () => {
+  this.listeners.forEach(unsubscribeFunc => unsubscribeFunc());
+});
 
-    _defineProperty(this, "handleQtyInputChange", e => {
-      const input = e.target;
-      const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
-      const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
-      let val = Number(input.value) || step;
-      if (val < step) val = step;
-      if (val > max) val = max;
-      input.value = val;
-      input.style.color = val >= max ? '#e3342f' : '';
-      product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, val, this);
-    });
+_defineProperty(this, "handleQtyInputChange", e => {
+  const input = e.target;
+  const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+  const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
+  let val = Number(input.value) || step;
 
-    _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
-      const {
-        quantitySelector
-      } = btn.dataset;
-      const {
-        quantityInput
-      } = this.domNodes;
-      const step = Number(quantityInput.getAttribute('data-min-qty')) || Number(quantityInput.step) || 1;
-      const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
-      const min = step;
-      const currentQty = Number(quantityInput.value) || min;
-      let newQty = currentQty;
+  if (val < step) val = step;
+  if (val > max) val = max;
+  input.value = val;
 
-      if (quantitySelector === 'decrease') {
-        newQty = currentQty - step;
-        if (newQty < min) newQty = min;
-      } else {
-        newQty = currentQty + step;
-        if (newQty > max) newQty = max;
-      }
+  // Colorare roșie la maxim
+  if (val >= max) {
+    input.classList.add('text-red-600');
+    input.style.color = '#e3342f';
+  } else {
+    input.classList.remove('text-red-600');
+    input.style.color = '';
+  }
 
-      quantityInput.value = newQty;
-      quantityInput.style.color = newQty >= max ? '#e3342f' : '';
-      product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, newQty, this);
-    });
+  product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, val, this);
+});
+
+_defineProperty(this, "handleQtyBtnClick", (e, btn) => {
+  const { quantitySelector } = btn.dataset;
+  const { quantityInput } = this.domNodes;
+  const step = Number(quantityInput.getAttribute('data-min-qty')) || Number(quantityInput.step) || 1;
+  const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
+  const min = step;
+  const currentQty = Number(quantityInput.value) || min;
+  let newQty = currentQty;
+
+  if (quantitySelector === 'decrease') {
+    newQty = currentQty - step;
+    if (newQty < min) newQty = min;
+  } else {
+    newQty = currentQty + step;
+    if (newQty > max) newQty = max;
+  }
+
+  quantityInput.value = newQty;
+
+  // Colorare roșie la maxim
+  if (newQty >= max) {
+    quantityInput.classList.add('text-red-600');
+    quantityInput.style.color = '#e3342f';
+  } else {
+    quantityInput.classList.remove('text-red-600');
+    quantityInput.style.color = '';
+  }
+
+  product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, newQty, this);
+});
 
     _defineProperty(this, "getVariantFromActiveOptions", () => {
       const {
@@ -9103,34 +9126,40 @@ class Product {
       }
     });
 
-    _defineProperty(this, "updateBySelectedVariant", variant => {
-      this.updateATCButtonByVariant(variant);
+_defineProperty(this, "updateBySelectedVariant", variant => {
+  this.updateATCButtonByVariant(variant);
 
-      const { quantityInput } = this.domNodes;
-      if (quantityInput && variant) {
-        quantityInput.max = variant.inventory_quantity ?? '';
-        if (Number(quantityInput.value) > Number(quantityInput.max)) {
-          quantityInput.value = quantityInput.max;
-          quantityInput.style.color = '#e3342f';
-        } else {
-          quantityInput.style.color = '';
-        }
-      }
+  const { quantityInput } = this.domNodes;
+  if (quantityInput && variant) {
+    quantityInput.max = variant.inventory_quantity ?? '';
 
-      if (variant) {
-        if (variant.id !== this.productData.current_variant_id) {
-          this.updateOptionByVariant(variant);
-          this.updatePriceByVariant(variant);
-          this.updateStockCountdownByVariant(variant);
-          this.updateSkuByVariant(variant);
-          this.updateAvailabilityByVariant(variant);
-          this.updateBrowserHistory(variant);
-          this.hideSoldoutAndUnavailableOptions(variant);
-          this.updateProductCardSoldOutBadge(variant);
-          this.productData.current_variant_id = variant.id;
-          this.changeProductImage(variant);
-        }
-      }
+    // Dacă valoarea din input depășește noul max, limitează și colorează cu roșu
+    if (Number(quantityInput.value) > Number(quantityInput.max)) {
+      quantityInput.value = quantityInput.max;
+      quantityInput.classList.add('text-red-600');
+      quantityInput.style.color = '#e3342f';
+    } else {
+      quantityInput.classList.remove('text-red-600');
+      quantityInput.style.color = '';
+    }
+  }
+
+  if (variant) {
+    if (variant.id !== this.productData.current_variant_id) {
+      this.updateOptionByVariant(variant);
+      this.updatePriceByVariant(variant);
+      this.updateStockCountdownByVariant(variant);
+      this.updateSkuByVariant(variant);
+      this.updateAvailabilityByVariant(variant);
+      this.updateBrowserHistory(variant);
+      this.hideSoldoutAndUnavailableOptions(variant);
+      this.updateProductCardSoldOutBadge(variant);
+      this.productData.current_variant_id = variant.id;
+      this.changeProductImage(variant);
+    }
+  }
+});
+
 
       product_ConceptSGMEvents.emit(`${this.productData.id}__VARIANT_CHANGE`, variant, this); // window?.DoublyGlobalCurrency?.convertAll?.($?.('[name=doubly-currencies]')?.val?.());
     });
