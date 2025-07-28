@@ -71,7 +71,10 @@
             {%- capture qty_input_class -%}
               mr-2.5 lg:mr-5 lg:flex {% unless product.has_only_default_variant %}hidden{% endunless %}
             {%- endcapture -%}
-            {% render 'product-qty-input', class: qty_input_class, product_form_id: product_form_id, show_double_qty_btn: section.settings.show_double_qty_btn %}
+            {% comment %}
+              Nu afișăm butonul rapid de adăugare în sticky bar
+            {% endcomment %}
+            {% render 'product-qty-input', class: qty_input_class, product_form_id: product_form_id, show_double_qty_btn: false %}
             {%- liquid
               assign btn_class = 'sf__btn-primary'
               if enable_dynamic_checkout

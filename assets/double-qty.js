@@ -42,6 +42,30 @@
     });
   }
 
+  // Atașează validarea la toate inputurile relevante
+  function attachQtyInputListeners(){
+    document.querySelectorAll('input[type="number"][data-min-qty]').forEach(function(input){
+      if(input.dataset.qtyListener) return;
+      input.dataset.qtyListener = '1';
+      ['input','change'].forEach(function(ev){
+        input.addEventListener(ev, function(){ validateAndHighlightQty(input); });
+      });
+    });
+  }
+
+  // Asigură highlight corect când se folosesc butoanele +/- existente în temă
+  function attachQtyButtonListeners(){
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest('[data-quantity-selector],[data-qty-change]');
+      if(!btn) return;
+      var container = btn.closest('.quantity-input') || btn.parentNode;
+      var input = container.querySelector('input[type="number"]');
+      if(input){
+        setTimeout(function(){ validateAndHighlightQty(input); }, 0);
+      }
+    });
+  }
+
   function adjustQuantity(input, delta){
     var step = parseInt(input.getAttribute('data-min-qty'), 10) || 1;
     var min = parseInt(input.min, 10) || step;
@@ -118,6 +142,8 @@
   function initAll(){
     applyMinQty();
     initDoubleQtyButtons();
+    attachQtyInputListeners();
+    attachQtyButtonListeners();
   }
   document.addEventListener('DOMContentLoaded', initAll);
   window.addEventListener('shopify:section:load', initAll);
