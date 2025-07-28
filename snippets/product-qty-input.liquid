@@ -17,6 +17,8 @@
         name="quantity"
         value="{{ product.metafields.custom.minimum_quantity | default: 1 }}"
         min="{{ product.metafields.custom.minimum_quantity | default: 1 }}"
+        max="{{ product.selected_or_first_available_variant.inventory_quantity }}"
+        step="{{ product.metafields.custom.minimum_quantity | default: 1 }}"
         aria-label="{{ 'products.product.product_quantity' | t }}"
         data-quantity-input
         data-min-qty="{{ product.metafields.custom.minimum_quantity | default: 1 }}"
@@ -39,9 +41,9 @@
     {%- assign min_qty = product.metafields.custom.minimum_quantity | default: 1 -%}
     <button type="button"
         class="double-qty-btn sf__btn sf__btn-secondary flex-1 max-w-[160px]"
-        aria-label="Adaugă {{ min_qty }} de bucăți"
+        aria-label="Adaugă {{ min_qty }} bucăți"
         data-double-qty>
-        Adaugă {{ min_qty }} de bucăți
+        Adaugă {{ min_qty }} bucăți
     </button>
   {%- endif -%}
 </div>
