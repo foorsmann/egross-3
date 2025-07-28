@@ -210,10 +210,6 @@
     </div>
   </div>
 
-  {%- comment -%}
-  Adăugat butonul "Dublează" după inputul de cantitate (mobile)
-  {%- endcomment -%}
-  {% render 'double-qty-btn', item: item %}
 
   <div class="sf-cart__table-col sf-cart__table-quantity hidden md:block">
     <div class="scd-item__qty flex justify-between border border-color-border rounded">
@@ -228,10 +224,6 @@
       />
       <button class="scd-item__btn" data-id="{{- item.key -}}" data-qty-change="inc">+</button>
     </div>
-    {%- comment -%}
-    Adăugat butonul "Dublează" după inputul de cantitate (desktop)
-    {%- endcomment -%}
-    {% render 'double-qty-btn', item: item %}
   </div>
 
   <div class="sf-cart__table-col sf-cart__table-subtotal text-right hidden md:block">
