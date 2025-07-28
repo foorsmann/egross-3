@@ -44,17 +44,22 @@
 
   // Atașează validarea la toate inputurile relevante
   function attachQtyInputListeners(){
-    document.querySelectorAll('input[type="number"][data-min-qty]').forEach(function(input){
+    var selectors = '.quantity-input__element, .scd-item__qty_input, input[data-quantity-input]';
+    document.querySelectorAll(selectors).forEach(function(input){
       if(input.dataset.qtyListener) return;
       input.dataset.qtyListener = '1';
       ['input','change'].forEach(function(ev){
         input.addEventListener(ev, function(){ validateAndHighlightQty(input); });
       });
+      validateAndHighlightQty(input);
     });
   }
 
   // Asigură highlight corect când se folosesc butoanele +/- existente în temă
+  var qtyBtnListenerAdded = false;
   function attachQtyButtonListeners(){
+    if(qtyBtnListenerAdded) return;
+    qtyBtnListenerAdded = true;
     document.addEventListener('click', function(e){
       var btn = e.target.closest('[data-quantity-selector],[data-qty-change]');
       if(!btn) return;
