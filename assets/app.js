@@ -7378,75 +7378,107 @@ class Cart {
       });
     }
 
-    addEventDelegate({
-      context: this.domNodes.cartDrawer,
-      selector: this.cartItemSelectors.btn,
-      handler: (e, btn) => {
-        e.preventDefault();
-        const {
-          qtyChange,
-          id
-        } = btn.dataset;
-        const item = this.getCartItemByKey(id);
+addEventDelegate({
+  context: this.domNodes.cartDrawer,
+  selector: this.cartItemSelectors.btn,
+  handler: (e, btn) => {
+    e.preventDefault();
+    const { qtyChange, id } = btn.dataset;
+    const item = this.getCartItemByKey(id);
 
-        if (item) {
-          const input = btn.parentElement.querySelector(this.cartItemSelectors.qtyInput);
-          const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
-          const max = Number(input.max) || Infinity;
-          let quantity = Number(input.value) || step;
+    if (item) {
+      const input = btn.parentElement.querySelector(this.cartItemSelectors.qtyInput);
+      const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+      const max = Number(input.max) || Infinity;
+      let quantity = Number(input.value) || step;
 
-          if (qtyChange === 'dec') {
-            quantity -= step;
-            if (quantity < step) quantity = step;
-          } else {
-            quantity += step;
-            if (quantity > max) quantity = max;
-          }
-
-          input.value = quantity;
-          if (quantity >= max) {
-            input.classList.add('text-red-600');
-            input.style.color = '#e3342f';
-          } else {
-            input.classList.remove('text-red-600');
-            input.style.color = '';
-          }
-
-          this.changeItemQty({
-            id,
-            quantity
-          });
-        } else {
-          console.warn(`Cart item to change quantity not found. Key: ${id}`);
+      // Snap quantity down to closest allowed multiple
+      const snapDown = v => {
+        if (v < step) return step;
+        if (v > max) v = max;
+        // If at max and max is not multiple of step, go to closest lower multiple
+        if (v === max && max % step !== 0) {
+          return Math.floor(max / step) * step;
         }
-      }
-    });
-    addEventDelegate({
-      context: this.domNodes.cartDrawer,
-      event: 'change',
-      selector: this.cartItemSelectors.qtyInput,
-      handler: (e, input) => {
-        e.preventDefault();
-        const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
-        const max = Number(input.max) || Infinity;
-        let quantity = Number(input.value) || step;
+        if (v % step !== 0) {
+          return Math.floor(v / step) * step;
+        }
+        return v;
+      };
+
+      if (qtyChange === 'dec') {
+        // If we're at max and it's not a multiple of step, snap to lower multiple
+        if (quantity === max && max % step !== 0) {
+          quantity = snapDown(max);
+        } else if (quantity % step !== 0) {
+          quantity = snapDown(quantity);
+        } else {
+          quantity -= step;
+        }
         if (quantity < step) quantity = step;
-        if (quantity > max) quantity = max;
-        input.value = quantity;
-        if (quantity >= max) {
-          input.classList.add('text-red-600');
-          input.style.color = '#e3342f';
-        } else {
-          input.classList.remove('text-red-600');
-          input.style.color = '';
+      } else {
+        // increment
+        if (quantity % step !== 0) {
+          quantity = snapDown(quantity);
         }
-        const { id } = input.dataset;
-        this.changeItemQty({
-          id,
-          quantity
-        });
+        quantity += step;
+        if (quantity > max) quantity = max;
       }
+
+      input.value = quantity;
+      if (quantity >= max) {
+        input.classList.add('text-red-600');
+        input.style.color = '#e3342f';
+      } else {
+        input.classList.remove('text-red-600');
+        input.style.color = '';
+      }
+
+      this.changeItemQty({
+        id,
+        quantity
+      });
+    } else {
+      console.warn(`Cart item to change quantity not found. Key: ${id}`);
+    }
+  }
+});
+
+addEventDelegate({
+  context: this.domNodes.cartDrawer,
+  event: 'change',
+  selector: this.cartItemSelectors.qtyInput,
+  handler: (e, input) => {
+    e.preventDefault();
+    const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+    const max = Number(input.max) || Infinity;
+    let quantity = Number(input.value) || step;
+
+    // Snap manual input to closest allowed multiple, but max out at stock
+    if (quantity > max) quantity = max;
+    if (quantity % step !== 0) {
+      // If above step, snap down to closest allowed multiple
+      quantity = Math.floor(quantity / step) * step;
+      if (quantity < step) quantity = step;
+    }
+    if (quantity < step) quantity = step;
+
+    input.value = quantity;
+    if (quantity >= max) {
+      input.classList.add('text-red-600');
+      input.style.color = '#e3342f';
+    } else {
+      input.classList.remove('text-red-600');
+      input.style.color = '';
+    }
+    const { id } = input.dataset;
+    this.changeItemQty({
+      id,
+      quantity
     });
+  }
+});
+
     addEventDelegate({
       context: this.domNodes.cartDrawer,
       selector: this.cartItemSelectors.remove,
@@ -8825,8 +8857,14 @@ _defineProperty(this, "handleQtyInputChange", e => {
   const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
   let val = Number(input.value) || step;
 
-  if (val < step) val = step;
+  const snapDown = v => {
+    if (v < step) return step;
+    return Math.floor((v - step) / step) * step + step;
+  };
+
   if (val > max) val = max;
+  if (val !== max) val = snapDown(val);
+  if (val < step) val = step;
   input.value = val;
 
   // Colorare roșie la maxim
@@ -8850,11 +8888,25 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   const currentQty = Number(quantityInput.value) || min;
   let newQty = currentQty;
 
+  const snapDown = v => {
+    if (v < min) return min;
+    return Math.floor((v - min) / step) * step + min;
+  };
+
   if (quantitySelector === 'decrease') {
-    newQty = currentQty - step;
+    if (currentQty > max) {
+      newQty = snapDown(max);
+    } else if (currentQty % step !== 0) {
+      newQty = snapDown(currentQty);
+    } else {
+      newQty = currentQty - step;
+    }
     if (newQty < min) newQty = min;
   } else {
-    newQty = currentQty + step;
+    if (currentQty % step !== 0) {
+      newQty = snapDown(currentQty);
+    }
+    newQty = newQty + step;
     if (newQty > max) newQty = max;
   }
 
