@@ -8733,7 +8733,7 @@ class Product {
 
     _defineProperty(this, "initProductEvents", async () => {
       // this.domNodes.variantDropdown?.addEventListener('change', this.handleSelectVariant)
-      this.listeners = [(0,events/* addEventDelegate */.X)({
+      const listeners = [(0,events/* addEventDelegate */.X)({
         event: 'change',
         context: this.productForm,
         selector: this.selectors.variantDropdown,
@@ -8746,16 +8746,26 @@ class Product {
         context: this.productForm,
         selector: this.selectors.addToCart,
         handler: this.handleAddToCart
-      }), (0,events/* addEventDelegate */.X)({
-        context: this.productForm,
-        selector: this.selectors.quantityBtns[0],
-        handler: this.handleQtyBtnClick
-      }), (0,events/* addEventDelegate */.X)({
-        event: 'change',
+      })];
+
+      // Avoid duplicate increments when the theme's <quantity-input> handles
+      // the buttons. Only attach our handler if that element is missing.
+      if (!this.productForm.querySelector('quantity-input')) {
+        listeners.push((0,events/* addEventDelegate */.X)({
+          context: this.productForm,
+          selector: this.selectors.quantityBtns[0],
+          handler: this.handleQtyBtnClick
+        }));
+      }
+
+      listeners.push((0,events/* addEventDelegate */.X)({
+        event: 'input',
         context: this.productForm,
         selector: this.selectors.quantityInput,
         handler: this.handleQtyInputChange
-      })];
+      }));
+
+      this.listeners = listeners;
       const {
         dynamicCheckout
       } = this.domNodes;
@@ -8784,7 +8794,9 @@ class Product {
     });
 
     _defineProperty(this, "handleQtyInputChange", e => {
-      product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, Number(e.target.value), this);
+      const input = e.target;
+      const val = window.validateAndHighlightQty ? window.validateAndHighlightQty(input) : Number(input.value);
+      product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, val, this);
     });
 
     _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
@@ -8794,17 +8806,13 @@ class Product {
       const {
         quantityInput
       } = this.domNodes;
-      const currentQty = Number(quantityInput.value);
-      let newQty = currentQty;
-
-      if (quantitySelector === 'decrease') {
-        newQty = currentQty > 1 ? currentQty - 1 : 1;
-      } else {
-        newQty = currentQty + 1;
-      }
-
+      const step = Number(quantityInput.getAttribute('data-min-qty')) || Number(quantityInput.step) || 1;
+      const min = step;
+      const currentQty = Number(quantityInput.value) || min;
+      let newQty = quantitySelector === 'decrease' ? currentQty - step : currentQty + step;
       quantityInput.value = newQty;
-      product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, newQty, this);
+      const valid = window.validateAndHighlightQty ? window.validateAndHighlightQty(quantityInput) : newQty;
+      product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, valid, this);
     });
 
     _defineProperty(this, "getVariantFromActiveOptions", () => {
@@ -9091,6 +9099,14 @@ class Product {
 
     _defineProperty(this, "updateBySelectedVariant", variant => {
       this.updateATCButtonByVariant(variant);
+
+      const { quantityInput } = this.domNodes;
+      if (quantityInput && variant) {
+        quantityInput.max = variant.inventory_quantity ?? '';
+        if (window.validateAndHighlightQty) {
+          window.validateAndHighlightQty(quantityInput);
+        }
+      }
 
       if (variant) {
         if (variant.id !== this.productData.current_variant_id) {
