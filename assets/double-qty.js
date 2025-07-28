@@ -109,6 +109,8 @@
   }
 
   // Rulează la pageload și la re-render (dacă ai AJAX sau Shopify section load)
+  // Nu mai atașăm handler-ele proprii pe butoanele +/- deoarece tema deja
+  // gestionează aceste evenimente. Astfel evităm dublarea pasului la click.
   function initAll(){
     applyMinQty();
     initDoubleQtyButtons();

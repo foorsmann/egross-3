@@ -8844,6 +8844,7 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, newQty, this);
 });
 
+
     _defineProperty(this, "getVariantFromActiveOptions", () => {
       const {
         productData,
@@ -9159,6 +9160,35 @@ _defineProperty(this, "updateBySelectedVariant", variant => {
     }
   }
 });
+
+const { quantityInput } = this.domNodes;
+if (quantityInput && variant) {
+  quantityInput.max = variant.inventory_quantity ?? '';
+  // Validare și highlight roșu dacă este cazul
+  if (Number(quantityInput.value) > Number(quantityInput.max)) {
+    quantityInput.value = quantityInput.max;
+    quantityInput.classList.add('text-red-600');
+    quantityInput.style.color = '#e3342f';
+  } else {
+    quantityInput.classList.remove('text-red-600');
+    quantityInput.style.color = '';
+  }
+}
+
+if (variant) {
+  if (variant.id !== this.productData.current_variant_id) {
+    this.updateOptionByVariant(variant);
+    this.updatePriceByVariant(variant);
+    this.updateStockCountdownByVariant(variant);
+    this.updateSkuByVariant(variant);
+    this.updateAvailabilityByVariant(variant);
+    this.updateBrowserHistory(variant);
+    this.hideSoldoutAndUnavailableOptions(variant);
+    this.updateProductCardSoldOutBadge(variant);
+    this.productData.current_variant_id = variant.id;
+    this.changeProductImage(variant);
+  }
+}
 
 
       product_ConceptSGMEvents.emit(`${this.productData.id}__VARIANT_CHANGE`, variant, this); // window?.DoublyGlobalCurrency?.convertAll?.($?.('[name=doubly-currencies]')?.val?.());
