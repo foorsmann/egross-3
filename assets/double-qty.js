@@ -27,18 +27,18 @@
   var LABEL_PREFIX = 'Adaugă ';
   var LABEL_SUFFIX = ' bucăți';
 
-  // Setează valoarea minimă definită în data-min-qty
+  // Setează valoarea minimă definită în data-min-qty și atașează validarea
   function applyMinQty(){
-    document.querySelectorAll('[data-min-qty]').forEach(function(input){
-      var min = parseInt(input.getAttribute('data-min-qty'), 10);
-      if(min && min > 0){
-        input.min = min;
-        input.step = min;
-        if(parseInt(input.value,10) < min){
-          input.value = min;
-        }
-        validateAndHighlightQty(input);
+    document.querySelectorAll('input[data-min-qty]').forEach(function(input){
+      var min = parseInt(input.getAttribute('data-min-qty'), 10) || 1;
+      input.min = min;
+      input.step = min;
+      if(!input.dataset.qtyListener){
+        input.addEventListener('input', function(){ validateAndHighlightQty(input); });
+        input.addEventListener('change', function(){ validateAndHighlightQty(input); });
+        input.dataset.qtyListener = '1';
       }
+      validateAndHighlightQty(input);
     });
   }
 
@@ -99,6 +99,7 @@
       }
       updateBtnState();
       input.addEventListener('input', updateBtnState);
+      input.addEventListener('change', updateBtnState);
 
       // Click: adaugă pasul minim (la fel ca la butonul plus)
       btn.addEventListener('click', function(e){
