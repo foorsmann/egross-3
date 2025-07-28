@@ -47,7 +47,7 @@
             "show_quantity_selector": true,
             "show_double_qty_btn": true,
             "show_atc_button": true,
-            "show_dynamic_checkout": true
+            "show_dynamic_checkout": false
           }
         },
         "5cb26444-7bc7-411a-957f-8aad695f0f9f": {
