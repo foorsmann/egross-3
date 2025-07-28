@@ -75,11 +75,15 @@
 
 
 
-      loadScript(window.BoosterApps.global_config.asset_urls.widgets.init_js, true, function(){});
+      if (window.BoosterApps.global_config && window.BoosterApps.global_config.asset_urls) {
+        loadScript(window.BoosterApps.global_config.asset_urls.widgets.init_js, true, function(){});
+      }
   }
 
   function main(err) {
     //isolate the scope
-    loadScript(window.BoosterApps.global_config.asset_urls.global.helper_js, false, loadAppScripts);
+    if (window.BoosterApps.global_config && window.BoosterApps.global_config.asset_urls) {
+      loadScript(window.BoosterApps.global_config.asset_urls.global.helper_js, false, loadAppScripts);
+    }
   }
 </script>
