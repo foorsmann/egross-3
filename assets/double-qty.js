@@ -4,13 +4,27 @@
 
 (function(){
   // Funcție comună pentru validare și highlight roșu la atingerea stocului
+  function snapDown(val, step, min){
+    if(val < min) return min;
+    return Math.floor((val - min) / step) * step + min;
+  }
+
+  function clampAndSnap(val, step, min, max){
+    val = Math.min(val, max);
+    if(val < min) val = min;
+    if(val !== max){
+      val = snapDown(val, step, min);
+    }
+    return val;
+  }
+
   function validateAndHighlightQty(input){
     var step = parseInt(input.getAttribute('data-min-qty'), 10) || parseInt(input.step,10) || 1;
     var min = parseInt(input.min, 10) || step;
     var max = input.max ? parseInt(input.max, 10) : Infinity;
-    var val = parseInt(input.value, 10) || min;
-    if(val < min) val = min;
-    if(val > max) val = max;
+    var val = parseInt(input.value, 10);
+    val = isNaN(val) ? min : val;
+    val = clampAndSnap(val, step, min, max);
     input.value = val;
     if(val >= max){
       input.classList.add('text-red-600');
@@ -48,8 +62,11 @@
     document.querySelectorAll(selectors).forEach(function(input){
       if(input.dataset.qtyListener) return;
       input.dataset.qtyListener = '1';
-      ['input','change'].forEach(function(ev){
+      ['input','change','blur'].forEach(function(ev){
         input.addEventListener(ev, function(){ validateAndHighlightQty(input); });
+      });
+      input.addEventListener('keypress', function(e){
+        if(e.key === 'Enter'){ validateAndHighlightQty(input); }
       });
       validateAndHighlightQty(input);
     });
@@ -76,9 +93,25 @@
     var min = parseInt(input.min, 10) || step;
     var max = input.max ? parseInt(input.max, 10) : Infinity;
     var val = parseInt(input.value, 10) || min;
-    var newVal = val + delta * step;
-    if(newVal < min) newVal = min;
-    if(newVal > max) newVal = max;
+
+    if(delta < 0){
+      if(val > max){
+        val = snapDown(max, step, min);
+      }else if(val % step !== 0){
+        val = snapDown(val, step, min);
+      }else{
+        val -= step;
+      }
+      if(val < min) val = min;
+    }else{
+      if(val % step !== 0){
+        val = snapDown(val, step, min);
+      }
+      val += step;
+      if(val > max) val = max;
+    }
+
+    var newVal = clampAndSnap(val, step, min, max);
     input.value = newVal;
     // Colorare roșie la maxim
     if(newVal >= max){

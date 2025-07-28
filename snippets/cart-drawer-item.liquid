@@ -108,7 +108,10 @@
             name="updates[]"
             data-id="{{- item.key -}}"
             value="{{- item.quantity -}}"
-            min="0"
+            min="{{ item.product.metafields.custom.minimum_quantity | default: 1 }}"
+            step="{{ item.product.metafields.custom.minimum_quantity | default: 1 }}"
+            data-min-qty="{{ item.product.metafields.custom.minimum_quantity | default: 1 }}"
+            max="{{ item.variant.inventory_quantity }}"
           />
           <button class="scd-item__btn" data-id="{{- item.key -}}" data-qty-change="inc">+</button>
         </div>

@@ -7390,10 +7390,42 @@ class Cart {
         const item = this.getCartItemByKey(id);
 
         if (item) {
-          let {
-            quantity
-          } = item;
-          quantity += qtyChange === 'dec' ? -1 : +1;
+          const input = btn.parentElement.querySelector(this.cartItemSelectors.qtyInput);
+          const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+          const max = Number(input.max) || Infinity;
+          let quantity = Number(input.value) || step;
+
+          const snapDown = v => {
+            if (v < step) return step;
+            return Math.floor((v - step) / step) * step + step;
+          };
+
+          if (qtyChange === 'dec') {
+            if (quantity > max) {
+              quantity = snapDown(max);
+            } else if (quantity % step !== 0) {
+              quantity = snapDown(quantity);
+            } else {
+              quantity -= step;
+            }
+            if (quantity < step) quantity = step;
+          } else {
+            if (quantity % step !== 0) {
+              quantity = snapDown(quantity);
+            }
+            quantity += step;
+            if (quantity > max) quantity = max;
+          }
+
+          input.value = quantity;
+          if (quantity >= max) {
+            input.classList.add('text-red-600');
+            input.style.color = '#e3342f';
+          } else {
+            input.classList.remove('text-red-600');
+            input.style.color = '';
+          }
+
           this.changeItemQty({
             id,
             quantity
@@ -7409,10 +7441,27 @@ class Cart {
       selector: this.cartItemSelectors.qtyInput,
       handler: (e, input) => {
         e.preventDefault();
-        const {
-          id
-        } = input.dataset;
-        const quantity = Number(input.value);
+        const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+        const max = Number(input.max) || Infinity;
+        let quantity = Number(input.value) || step;
+
+        const snapDown = v => {
+          if (v < step) return step;
+          return Math.floor((v - step) / step) * step + step;
+        };
+
+        if (quantity > max) quantity = max;
+        if (quantity !== max) quantity = snapDown(quantity);
+        if (quantity < step) quantity = step;
+        input.value = quantity;
+        if (quantity >= max) {
+          input.classList.add('text-red-600');
+          input.style.color = '#e3342f';
+        } else {
+          input.classList.remove('text-red-600');
+          input.style.color = '';
+        }
+        const { id } = input.dataset;
         this.changeItemQty({
           id,
           quantity
@@ -8797,8 +8846,14 @@ _defineProperty(this, "handleQtyInputChange", e => {
   const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
   let val = Number(input.value) || step;
 
-  if (val < step) val = step;
+  const snapDown = v => {
+    if (v < step) return step;
+    return Math.floor((v - step) / step) * step + step;
+  };
+
   if (val > max) val = max;
+  if (val !== max) val = snapDown(val);
+  if (val < step) val = step;
   input.value = val;
 
   // Colorare roșie la maxim
@@ -8822,11 +8877,25 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   const currentQty = Number(quantityInput.value) || min;
   let newQty = currentQty;
 
+  const snapDown = v => {
+    if (v < min) return min;
+    return Math.floor((v - min) / step) * step + min;
+  };
+
   if (quantitySelector === 'decrease') {
-    newQty = currentQty - step;
+    if (currentQty > max) {
+      newQty = snapDown(max);
+    } else if (currentQty % step !== 0) {
+      newQty = snapDown(currentQty);
+    } else {
+      newQty = currentQty - step;
+    }
     if (newQty < min) newQty = min;
   } else {
-    newQty = currentQty + step;
+    if (currentQty % step !== 0) {
+      newQty = snapDown(currentQty);
+    }
+    newQty = newQty + step;
     if (newQty > max) newQty = max;
   }
 
