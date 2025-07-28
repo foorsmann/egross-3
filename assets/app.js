@@ -8784,7 +8784,15 @@ class Product {
     });
 
     _defineProperty(this, "handleQtyInputChange", e => {
-      product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, Number(e.target.value), this);
+      const input = e.target;
+      const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+      const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
+      let val = Number(input.value) || step;
+      if (val < step) val = step;
+      if (val > max) val = max;
+      input.value = val;
+      input.style.color = val >= max ? '#e3342f' : '';
+      product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, val, this);
     });
 
     _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
@@ -8794,16 +8802,22 @@ class Product {
       const {
         quantityInput
       } = this.domNodes;
-      const currentQty = Number(quantityInput.value);
+      const step = Number(quantityInput.getAttribute('data-min-qty')) || Number(quantityInput.step) || 1;
+      const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
+      const min = step;
+      const currentQty = Number(quantityInput.value) || min;
       let newQty = currentQty;
 
       if (quantitySelector === 'decrease') {
-        newQty = currentQty > 1 ? currentQty - 1 : 1;
+        newQty = currentQty - step;
+        if (newQty < min) newQty = min;
       } else {
-        newQty = currentQty + 1;
+        newQty = currentQty + step;
+        if (newQty > max) newQty = max;
       }
 
       quantityInput.value = newQty;
+      quantityInput.style.color = newQty >= max ? '#e3342f' : '';
       product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, newQty, this);
     });
 
@@ -9091,6 +9105,17 @@ class Product {
 
     _defineProperty(this, "updateBySelectedVariant", variant => {
       this.updateATCButtonByVariant(variant);
+
+      const { quantityInput } = this.domNodes;
+      if (quantityInput && variant) {
+        quantityInput.max = variant.inventory_quantity ?? '';
+        if (Number(quantityInput.value) > Number(quantityInput.max)) {
+          quantityInput.value = quantityInput.max;
+          quantityInput.style.color = '#e3342f';
+        } else {
+          quantityInput.style.color = '';
+        }
+      }
 
       if (variant) {
         if (variant.id !== this.productData.current_variant_id) {

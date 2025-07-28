@@ -29,6 +29,7 @@
     if(newVal < min) newVal = min;
     if(newVal > max) newVal = max;
     input.value = newVal;
+    input.style.color = newVal >= max ? '#e3342f' : '';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
   }
@@ -65,6 +66,7 @@
         var max = input.max ? parseInt(input.max, 10) : 9999;
         var val = parseInt(input.value, 10) || 1;
         btn.disabled = val >= max;
+        input.style.color = val >= max ? '#e3342f' : '';
       }
       updateBtnState();
       input.addEventListener('input', updateBtnState);
@@ -112,10 +114,11 @@
   }
 
   // Rulează la pageload și la re-render (dacă ai AJAX sau Shopify section load)
+  // Nu mai atașăm handler-ele proprii pe butoanele +/- deoarece tema deja
+  // gestionează aceste evenimente. Astfel evităm dublarea pasului la click.
   function initAll(){
     applyMinQty();
     initDoubleQtyButtons();
-    initQuantityButtons();
   }
   document.addEventListener('DOMContentLoaded', initAll);
   window.addEventListener('shopify:section:load', initAll);
