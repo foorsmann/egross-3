@@ -8731,61 +8731,67 @@ class Product {
       });
     });
 
-    _defineProperty(this, "initProductEvents", async () => {
-      // this.domNodes.variantDropdown?.addEventListener('change', this.handleSelectVariant)
-      const listeners = [(0,events/* addEventDelegate */.X)({
-        event: 'change',
-        context: this.productForm,
-        selector: this.selectors.variantDropdown,
-        handler: this.handleSelectVariant
-      }), (0,events/* addEventDelegate */.X)({
-        context: this.productForm,
-        selector: this.selectors.optionNodes[0],
-        handler: this.handleSelectVariant
-      }), (0,events/* addEventDelegate */.X)({
-        context: this.productForm,
-        selector: this.selectors.addToCart,
-        handler: this.handleAddToCart
-      })];
+_defineProperty(this, "initProductEvents", async () => {
+  // this.domNodes.variantDropdown?.addEventListener('change', this.handleSelectVariant)
+  const listeners = [
+    (0,events/* addEventDelegate */.X)({
+      event: 'change',
+      context: this.productForm,
+      selector: this.selectors.variantDropdown,
+      handler: this.handleSelectVariant
+    }),
+    (0,events/* addEventDelegate */.X)({
+      context: this.productForm,
+      selector: this.selectors.optionNodes[0],
+      handler: this.handleSelectVariant
+    }),
+    (0,events/* addEventDelegate */.X)({
+      context: this.productForm,
+      selector: this.selectors.addToCart,
+      handler: this.handleAddToCart
+    })
+  ];
 
-      if (!(window.customElements && window.customElements.get('quantity-input'))){
-        listeners.push((0,events/* addEventDelegate */.X)({
-          context: this.productForm,
-          selector: this.selectors.quantityBtns[0],
-          handler: this.handleQtyBtnClick
-        }));
+  // Adaugă handler pentru butoane de quantity DOAR dacă nu există <quantity-input> custom (evităm duplicare)
+  if (!(window.customElements && window.customElements.get('quantity-input'))){
+    listeners.push((0,events/* addEventDelegate */.X)({
+      context: this.productForm,
+      selector: this.selectors.quantityBtns[0],
+      handler: this.handleQtyBtnClick
+    }));
+  }
+
+  // Handler pentru inputul de quantity (change = merge pentru input și la + / -)
+  listeners.push((0,events/* addEventDelegate */.X)({
+    event: 'change',
+    context: this.productForm,
+    selector: this.selectors.quantityInput,
+    handler: this.handleQtyInputChange
+  }));
+
+  this.listeners = listeners;
+  const {
+    dynamicCheckout
+  } = this.domNodes;
+
+  if (dynamicCheckout && this.hasCustomRequiredFields) {
+    dynamicCheckout.addEventListener('click', e => {
+      const missing = productFormCheck(this.productForm);
+
+      if (missing.length > 0) {
+        e.stopPropagation();
+        modules_product_ConceptSGMTheme.Notification.show({
+          target: this.domNodes.error,
+          method: 'appendChild',
+          type: 'warning',
+          message: product_ConceptSGMStrings.requiredField,
+          delay: 100
+        });
+        console.warn('Missing field(s): ', missing);
       }
-
-      listeners.push((0,events/* addEventDelegate */.X)({
-        event: 'change',
-        context: this.productForm,
-        selector: this.selectors.quantityInput,
-        handler: this.handleQtyInputChange
-      }));
-
-      this.listeners = listeners;
-      const {
-        dynamicCheckout
-      } = this.domNodes;
-
-      if (dynamicCheckout && this.hasCustomRequiredFields) {
-        dynamicCheckout.addEventListener('click', e => {
-          const missing = productFormCheck(this.productForm);
-
-          if (missing.length > 0) {
-            e.stopPropagation();
-            modules_product_ConceptSGMTheme.Notification.show({
-              target: this.domNodes.error,
-              method: 'appendChild',
-              type: 'warning',
-              message: product_ConceptSGMStrings.requiredField,
-              delay: 100
-            });
-            console.warn('Missing field(s): ', missing);
-          }
-        }, true);
-      }
-    });
+    }, true);
+  }
+});
 
 _defineProperty(this, "unsubscribeEvents", () => {
   this.listeners.forEach(unsubscribeFunc => unsubscribeFunc());
@@ -9144,6 +9150,25 @@ _defineProperty(this, "updateBySelectedVariant", variant => {
       quantityInput.style.color = '';
     }
   }
+
+  if (variant) {
+    if (variant.id !== this.productData.current_variant_id) {
+      this.updateOptionByVariant(variant);
+      this.updatePriceByVariant(variant);
+      this.updateStockCountdownByVariant(variant);
+      this.updateSkuByVariant(variant);
+      this.updateAvailabilityByVariant(variant);
+      this.updateBrowserHistory(variant);
+      this.hideSoldoutAndUnavailableOptions(variant);
+      this.updateProductCardSoldOutBadge(variant);
+      this.productData.current_variant_id = variant.id;
+      this.changeProductImage(variant);
+    }
+  }
+
+  product_ConceptSGMEvents.emit(`${this.productData.id}__VARIANT_CHANGE`, variant, this);
+});
+
 
   if (variant && variant.id !== this.productData.current_variant_id) {
     this.updateOptionByVariant(variant);
