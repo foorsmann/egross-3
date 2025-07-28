@@ -298,7 +298,7 @@
       "mobile-sticky-bar": {
         "type": "mobile-sticky-bar",
         "settings": {
-          "show_mobile_sticky": false,
+          "show_mobile_sticky": true,
           "show_home_icon": true,
           "show_collection_icon": true,
           "show_cart_icon": true,
