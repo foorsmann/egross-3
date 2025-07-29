@@ -1,9 +1,6 @@
 /* Stiluri pentru butonul "Dublează" cantitate, responsive, focus, acțiune principală */
-/* Width is handled via Tailwind classes (flex-1 max-w-[160px]) */
-
-/* double-qty.css - Stiluri pentru butonul "Dublează" cantitate
-Autor: Saga Media / Egross
-Descriere: Stiluri responsive, accesibile, preia stilul principal al butoanelor de acțiune din temă. Modifică rapid variabilele dacă vrei alt aspect. */
+/* double-qty.css - Autor: Saga Media / Egross */
+/* Toate stările folosesc styling-ul normal, exclusiv pe variabile din temă */
 
 .double-qty-btn {
   display: inline-flex;
@@ -35,9 +32,24 @@ Descriere: Stiluri responsive, accesibile, preia stilul principal al butoanelor 
 .double-qty-btn:active {
   transform: scale(0.98);
 }
+
+
+/* Efect fizic de apăsare la click */
+.double-qty-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Disabled styling */
+.double-qty-btn:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+/* Responsive: font și padding mai mic pe mobile */
 @media (max-width: 600px) {
   .double-qty-btn {
     font-size: 0.95em;
     padding: 0.4em 0.8em;
   }
 }
+
