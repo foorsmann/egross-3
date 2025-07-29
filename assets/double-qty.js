@@ -224,6 +224,7 @@
       }
       updateBtnState();
       input.addEventListener('input', updateBtnState);
+      input.addEventListener('change', updateBtnState);
 
       btn.addEventListener('click', function(e){
         e.preventDefault();
