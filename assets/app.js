@@ -7445,6 +7445,7 @@ addEventDelegate({
   }
 });
 
+
 addEventDelegate({
   context: this.domNodes.cartDrawer,
   event: 'change',
@@ -8855,9 +8856,12 @@ _defineProperty(this, "handleQtyInputChange", e => {
   const input = e.target;
   const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
   const min = Number(input.min) || step;
+
+  // Folosește întâi input.max dacă există, altfel variant.inventory_quantity
   let max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
   const attrMax = parseFloat(input.max);
   if (!Number.isNaN(attrMax)) max = attrMax;
+
   let val = Number(input.value) || min;
 
   const snapDown = v => {
@@ -8883,14 +8887,18 @@ _defineProperty(this, "handleQtyInputChange", e => {
   product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, val, this);
 });
 
+
 _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   const { quantitySelector } = btn.dataset;
   const { quantityInput } = this.domNodes;
   const step = Number(quantityInput.getAttribute('data-min-qty')) || Number(quantityInput.step) || 1;
   const min = Number(quantityInput.min) || step;
+
+  // Folosește întâi input.max dacă există, altfel variant.inventory_quantity
   let max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
   const attrMax = parseFloat(quantityInput.max);
   if (!Number.isNaN(attrMax)) max = attrMax;
+
   const currentQty = Number(quantityInput.value) || min;
   let newQty = currentQty;
 
@@ -8930,6 +8938,7 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
 
   product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, newQty, this);
 });
+
 
 
     _defineProperty(this, "getVariantFromActiveOptions", () => {
