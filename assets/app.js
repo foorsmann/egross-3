@@ -8923,16 +8923,18 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   let newQty = currentQty;
 
   if (quantitySelector !== 'decrease' && isFinite(max) && currentQty >= max) {
+    // Dacă e deja la maxim, doar colorează și validează fără a incrementa mai mult
     if (typeof validateAndHighlightQty === 'function') {
       validateAndHighlightQty(quantityInput);
     } else {
       quantityInput.classList.add('text-red-600');
       quantityInput.style.color = '#e3342f';
     }
-    this.updateIncreaseBtnState();
+    this.updateIncreaseBtnState && this.updateIncreaseBtnState();
     return;
   }
 
+  // Helper pentru a ajusta la cel mai apropiat multiplu valid în jos
   const snapDown = v => {
     if (!isFinite(v)) return min;
     if (v < min) return min;
@@ -8967,7 +8969,7 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
     quantityInput.style.color = '';
   }
 
-  this.updateIncreaseBtnState();
+  this.updateIncreaseBtnState && this.updateIncreaseBtnState();
   product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, newQty, this);
 });
 

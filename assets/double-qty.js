@@ -4,7 +4,6 @@
 
 (function(){
   // Funcție comună pentru validare și highlight roșu la atingerea stocului
-  // Round value down to the nearest valid multiple based on the minimum step
   function snapDown(val, step, min){
     if(!isFinite(val)) return min;
     if(val < min) return min;
@@ -37,6 +36,7 @@
     }
     return val;
   }
+
   function updateIncreaseBtnState(input){
     var container = input.closest('.quantity-input') || input.parentNode;
     if(!container) return;
@@ -49,6 +49,7 @@
     if(isNaN(val)) val = min;
     plus.disabled = isFinite(max) && val >= max;
   }
+
   window.validateAndHighlightQty = validateAndHighlightQty;
 
   var BUTTON_CLASS = 'double-qty-btn';
@@ -81,7 +82,10 @@
         });
       });
       input.addEventListener('keypress', function(e){
-        if(e.key === 'Enter'){ validateAndHighlightQty(input); updateIncreaseBtnState(input); }
+        if(e.key === 'Enter'){ 
+          validateAndHighlightQty(input); 
+          updateIncreaseBtnState(input); 
+        }
       });
       validateAndHighlightQty(input);
       updateIncreaseBtnState(input);
@@ -131,6 +135,7 @@
     var val = parseInt(input.value, 10);
     if(isNaN(val)) val = min;
 
+    // Increment: dacă suntem deja la maxim sau peste, doar validează și colorează, nu schimba valoarea!
     if(delta > 0 && isFinite(max) && val >= max){
       validateAndHighlightQty(input);
       updateIncreaseBtnState(input);
@@ -227,6 +232,7 @@
 
   window.doubleQtyInit = initDoubleQtyButtons;
 })();
+
 
 
 
