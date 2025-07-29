@@ -317,16 +317,13 @@
                   <input type="hidden" name="id" value="{{ variant_id }}" data-selected-variant="{{ selected_variant_id }}" disabled>
                   <div class="product-form__actions" data-cart-actions>
                     {% if block.settings.show_quantity_selector == true %}
-                      <label class="prod__option-label prod__option-label__quantity font-medium hidden md:block">
+                      <label for="{{ product_form_id }}-qty" class="prod__option-label prod__option-label__quantity font-medium">
                         {{ 'products.product.quantity' | t }}
                       </label>
                     {% endif %}
                     <div class="flex flex-wrap items-end">
                       {% if block.settings.show_quantity_selector %}
                         <div class="form__input-wrapper form__input-wrapper--select mr-5 w-32" data-quantity-input-wrapper>
-                          <label class="prod__option-label font-medium md:hidden">
-                            {{ 'products.product.quantity' | t }}
-                          </label>
 {% render 'product-qty-input', product_form_id: product_form_id, show_double_qty_btn: block.settings.show_double_qty_btn %}
 
                         </div>

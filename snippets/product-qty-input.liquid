@@ -1,5 +1,6 @@
 {% comment %}Quantity selector and optional "Add minimum quantity" button{% endcomment %}
 <div class="flex gap-2 w-full">
+  {%- assign qty_input_id = product_form_id | append: '-qty' -%}
   <quantity-input class="quantity-input h-[46px] flex border border-color-border rounded flex-1 {{ class }}" data-product-id="{{ product.id }}">
     <button
         class="quantity-input__button flex items-center justify-center h-[46px] w-[46px]"
@@ -15,6 +16,7 @@
         class="quantity-input__element w-10 text-center flex-grow shrink appearance-none"
         type="number"
         name="quantity"
+        id="{{ qty_input_id }}"
         value="{{ product.metafields.custom.minimum_quantity | default: 1 }}"
         min="{{ product.metafields.custom.minimum_quantity | default: 1 }}"
         max="{{ product.selected_or_first_available_variant.inventory_quantity }}"
