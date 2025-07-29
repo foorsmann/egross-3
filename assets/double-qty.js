@@ -90,7 +90,7 @@
         var before = input.value;
         setTimeout(function(){
           if(input.value === before){
-            var action = btn.getAttribute('data-quantity-selector') || btn.getAttribute('data-qty-change');
+            var action = btn.dataset.quantitySelector || btn.dataset.qtyChange;
             if(action === 'increase' || action === 'inc'){
               adjustQuantity(input, 1);
             }else if(action === 'decrease' || action === 'dec'){
