@@ -37,6 +37,18 @@
     }
     return val;
   }
+  function updateIncreaseBtnState(input){
+    var container = input.closest('.quantity-input') || input.parentNode;
+    if(!container) return;
+    var plus = container.querySelector('[data-quantity-selector="increase"],[data-qty-change="inc"]');
+    if(!plus) return;
+    var max = input.max ? parseInt(input.max, 10) : Infinity;
+    var step = parseInt(input.getAttribute('data-min-qty'), 10) || parseInt(input.step,10) || 1;
+    var min = parseInt(input.min, 10) || step;
+    var val = parseInt(input.value, 10);
+    if(isNaN(val)) val = min;
+    plus.disabled = isFinite(max) && val >= max;
+  }
   window.validateAndHighlightQty = validateAndHighlightQty;
 
   var BUTTON_CLASS = 'double-qty-btn';
@@ -63,12 +75,16 @@
       if(input.dataset.qtyListener) return;
       input.dataset.qtyListener = '1';
       ['input','change','blur'].forEach(function(ev){
-        input.addEventListener(ev, function(){ validateAndHighlightQty(input); });
+        input.addEventListener(ev, function(){
+          validateAndHighlightQty(input);
+          updateIncreaseBtnState(input);
+        });
       });
       input.addEventListener('keypress', function(e){
-        if(e.key === 'Enter'){ validateAndHighlightQty(input); }
+        if(e.key === 'Enter'){ validateAndHighlightQty(input); updateIncreaseBtnState(input); }
       });
       validateAndHighlightQty(input);
+      updateIncreaseBtnState(input);
     });
   }
 
@@ -98,8 +114,10 @@
             }else{
               validateAndHighlightQty(input);
             }
+            updateIncreaseBtnState(input);
           }else{
             validateAndHighlightQty(input);
+            updateIncreaseBtnState(input);
           }
         }, 0);
       }
@@ -110,7 +128,14 @@
     var step = parseInt(input.getAttribute('data-min-qty'), 10) || 1;
     var min = parseInt(input.min, 10) || step;
     var max = input.max ? parseInt(input.max, 10) : Infinity;
-    var val = parseInt(input.value, 10) || min;
+    var val = parseInt(input.value, 10);
+    if(isNaN(val)) val = min;
+
+    if(delta > 0 && isFinite(max) && val >= max){
+      validateAndHighlightQty(input);
+      updateIncreaseBtnState(input);
+      return;
+    }
 
     if(delta < 0){
       // Pentru decremente, când suntem la max și nu e multiplu, snapDown pe max!
@@ -141,6 +166,7 @@
     }
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
+    updateIncreaseBtnState(input);
   }
 
   function findQtyInput(btn) {
@@ -172,6 +198,7 @@
         var val = parseInt(input.value, 10) || 1;
         btn.disabled = val >= max;
         validateAndHighlightQty(input);
+        updateIncreaseBtnState(input);
       }
       updateBtnState();
       input.addEventListener('input', updateBtnState);
