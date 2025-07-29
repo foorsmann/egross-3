@@ -8899,8 +8899,15 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   const attrMax = parseFloat(quantityInput.max);
   if (!Number.isNaN(attrMax)) max = attrMax;
 
-  const currentQty = Number(quantityInput.value) || min;
+  let currentQty = parseInt(quantityInput.value, 10);
+  if (Number.isNaN(currentQty)) currentQty = min;
   let newQty = currentQty;
+
+  if (quantitySelector !== 'decrease' && isFinite(max) && currentQty >= max) {
+    quantityInput.classList.add('text-red-600');
+    quantityInput.style.color = '#e3342f';
+    return;
+  }
 
   const snapDown = v => {
     if (!isFinite(v)) return min;
