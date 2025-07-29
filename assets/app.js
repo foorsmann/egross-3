@@ -7395,6 +7395,7 @@ addEventDelegate({
 
       // Snap quantity down to closest allowed multiple
       const snapDown = v => {
+        if (!isFinite(v)) return min;
         if (v < min) return min;
         if (v > max) v = max;
         if (v === max && max % step !== 0) {
@@ -7443,6 +7444,7 @@ addEventDelegate({
     }
   }
 });
+
 
 addEventDelegate({
   context: this.domNodes.cartDrawer,
@@ -8858,6 +8860,7 @@ _defineProperty(this, "handleQtyInputChange", e => {
   let val = Number(input.value) || min;
 
   const snapDown = v => {
+    if (!isFinite(v)) return min;
     if (v < min) return min;
     return Math.floor((v - min) / step) * step + min;
   };
@@ -8879,6 +8882,7 @@ _defineProperty(this, "handleQtyInputChange", e => {
   product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, val, this);
 });
 
+
 _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   const { quantitySelector } = btn.dataset;
   const { quantityInput } = this.domNodes;
@@ -8889,6 +8893,7 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   let newQty = currentQty;
 
   const snapDown = v => {
+    if (!isFinite(v)) return min;
     if (v < min) return min;
     return Math.floor((v - min) / step) * step + min;
   };
