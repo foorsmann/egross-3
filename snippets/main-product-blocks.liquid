@@ -302,31 +302,30 @@
                   assign selected_variant_id = product.selected_variant.id
                 endunless
               %}
-              <product-form class="f-product-form" data-product-id="{{ product.id }}">
-                {%- form 'product', product,
-                  id: product_form_id,
-                  class: product_form_class,
-                  novalidate: 'novalidate',
-                  data-type: 'add-to-cart-form', data-product-id: product.id,
-                  data-product-handle: product.handle,
-                  data-preorder: is_preorder,
-                  data-dynamic-checkout: show_dynamic_checkout,
-                  data-enable-image-zoom: section.settings.show_zoom_button,
-                  data-enable-history-state: section.settings.enable_history_state,
-                  data-enable-video-autoplay: section.settings.enable_video_autoplay -%}
-                  <input type="hidden" name="id" value="{{ variant_id }}" data-selected-variant="{{ selected_variant_id }}" disabled>
-                  <div class="product-form__actions" data-cart-actions>
-                    {% if block.settings.show_quantity_selector == true %}
-                      <label for="{{ product_form_id }}-qty" class="prod__option-label prod__option-label__quantity font-medium">
-                        {{ 'products.product.quantity' | t }}
-                      </label>
-                    {% endif %}
-                    <div class="flex flex-wrap items-end">
-                      {% if block.settings.show_quantity_selector %}
-                        <div class="form__input-wrapper form__input-wrapper--select mr-5 w-32" data-quantity-input-wrapper>
-{% render 'product-qty-input', product_form_id: product_form_id, show_double_qty_btn: block.settings.show_double_qty_btn %}
-
-                        </div>
+<product-form class="f-product-form" data-product-id="{{ product.id }}">
+  {%- form 'product', product,
+    id: product_form_id,
+    class: product_form_class,
+    novalidate: 'novalidate',
+    data-type: 'add-to-cart-form', data-product-id: product.id,
+    data-product-handle: product.handle,
+    data-preorder: is_preorder,
+    data-dynamic-checkout: show_dynamic_checkout,
+    data-enable-image-zoom: section.settings.show_zoom_button,
+    data-enable-history-state: section.settings.enable_history_state,
+    data-enable-video-autoplay: section.settings.enable_video_autoplay -%}
+    <input type="hidden" name="id" value="{{ variant_id }}" data-selected-variant="{{ selected_variant_id }}" disabled>
+    <div class="product-form__actions" data-cart-actions>
+      {% if block.settings.show_quantity_selector == true %}
+        <label for="{{ product_form_id }}-qty" class="prod__option-label prod__option-label__quantity font-medium">
+          {{ 'products.product.quantity' | t }}
+        </label>
+      {% endif %}
+      <div class="flex flex-wrap items-end">
+        {% if block.settings.show_quantity_selector %}
+          <div class="form__input-wrapper form__input-wrapper--select mr-5 w-32" data-quantity-input-wrapper>
+            {% render 'product-qty-input', product_form_id: product_form_id, show_double_qty_btn: block.settings.show_double_qty_btn %}
+          </div>
                       {% endif %}
                       {% if block.settings.show_atc_button %}
                         {% liquid
