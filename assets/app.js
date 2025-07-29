@@ -8885,6 +8885,25 @@ _defineProperty(this, "handleQtyInputChange", e => {
   }
 
   product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, val, this);
+  this.updateIncreaseBtnState();
+});
+
+_defineProperty(this, "updateIncreaseBtnState", () => {
+  const { quantityInput, quantityBtns } = this.domNodes;
+  if (!quantityInput || !quantityBtns) return;
+  const plusBtn = Array.isArray(quantityBtns)
+    ? quantityBtns.find(b => b.dataset.quantitySelector === 'increase' || b.name === 'plus')
+    : null;
+  if (!plusBtn) return;
+
+  const step = Number(quantityInput.getAttribute('data-min-qty')) || Number(quantityInput.step) || 1;
+  const min = Number(quantityInput.min) || step;
+  let max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
+  const attrMax = parseFloat(quantityInput.max);
+  if (!Number.isNaN(attrMax)) max = attrMax;
+  let val = parseInt(quantityInput.value, 10);
+  if (Number.isNaN(val)) val = min;
+  plusBtn.disabled = isFinite(max) && val >= max;
 });
 
 
@@ -8911,10 +8930,11 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
       quantityInput.classList.add('text-red-600');
       quantityInput.style.color = '#e3342f';
     }
+    this.updateIncreaseBtnState && this.updateIncreaseBtnState();
     return;
   }
 
-  // LOGICA NORMALĂ DE INCREMENT/DECREMENT
+  // Helper pentru a ajusta la cel mai apropiat multiplu valid în jos
   const snapDown = v => {
     if (!isFinite(v)) return min;
     if (v < min) return min;
@@ -8949,6 +8969,7 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
     quantityInput.style.color = '';
   }
 
+  this.updateIncreaseBtnState && this.updateIncreaseBtnState();
   product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, newQty, this);
 });
 
