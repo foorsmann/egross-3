@@ -7389,33 +7389,34 @@ addEventDelegate({
     if (item) {
       const input = btn.parentElement.querySelector(this.cartItemSelectors.qtyInput);
       const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+      const min = Number(input.min) || step;
       const max = Number(input.max) || Infinity;
-      let quantity = Number(input.value) || step;
+      let quantity = Number(input.value) || min;
 
       // Snap quantity down to closest allowed multiple
       const snapDown = v => {
-        if (v < step) return step;
+        if (!isFinite(v)) return min;
+        if (v < min) return min;
         if (v > max) v = max;
-        // If at max and max is not multiple of step, go to closest lower multiple
         if (v === max && max % step !== 0) {
-          return Math.floor(max / step) * step;
+          return Math.floor((max - min) / step) * step + min;
         }
         if (v % step !== 0) {
-          return Math.floor(v / step) * step;
+          return Math.floor((v - min) / step) * step + min;
         }
         return v;
       };
 
       if (qtyChange === 'dec') {
-        // If we're at max and it's not a multiple of step, snap to lower multiple
-        if (quantity === max && max % step !== 0) {
+        // If we're at or above max and max isn't a perfect multiple, snap down
+        if (quantity >= max && max % step !== 0) {
           quantity = snapDown(max);
         } else if (quantity % step !== 0) {
           quantity = snapDown(quantity);
         } else {
           quantity -= step;
         }
-        if (quantity < step) quantity = step;
+        if (quantity < min) quantity = min;
       } else {
         // increment
         if (quantity % step !== 0) {
@@ -7451,17 +7452,16 @@ addEventDelegate({
   handler: (e, input) => {
     e.preventDefault();
     const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+    const min = Number(input.min) || step;
     const max = Number(input.max) || Infinity;
-    let quantity = Number(input.value) || step;
+    let quantity = Number(input.value) || min;
 
-    // Snap manual input to closest allowed multiple, but max out at stock
+    // Snap manual input to the closest allowed value
     if (quantity > max) quantity = max;
-    if (quantity % step !== 0) {
-      // If above step, snap down to closest allowed multiple
-      quantity = Math.floor(quantity / step) * step;
-      if (quantity < step) quantity = step;
+    if (quantity !== max) {
+      quantity = Math.floor((quantity - min) / step) * step + min;
+      if (quantity < min) quantity = min;
     }
-    if (quantity < step) quantity = step;
 
     input.value = quantity;
     if (quantity >= max) {
@@ -8854,17 +8854,19 @@ _defineProperty(this, "unsubscribeEvents", () => {
 _defineProperty(this, "handleQtyInputChange", e => {
   const input = e.target;
   const step = Number(input.getAttribute('data-min-qty')) || Number(input.step) || 1;
+  const min = Number(input.min) || step;
   const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
-  let val = Number(input.value) || step;
+  let val = Number(input.value) || min;
 
   const snapDown = v => {
-    if (v < step) return step;
-    return Math.floor((v - step) / step) * step + step;
+    if (!isFinite(v)) return min;
+    if (v < min) return min;
+    return Math.floor((v - min) / step) * step + min;
   };
 
   if (val > max) val = max;
   if (val !== max) val = snapDown(val);
-  if (val < step) val = step;
+  if (val < min) val = min;
   input.value = val;
 
   // Colorare roșie la maxim
@@ -8883,18 +8885,19 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   const { quantitySelector } = btn.dataset;
   const { quantityInput } = this.domNodes;
   const step = Number(quantityInput.getAttribute('data-min-qty')) || Number(quantityInput.step) || 1;
+  const min = Number(quantityInput.min) || step;
   const max = this.productData?.selected_variant?.inventory_quantity ?? Infinity;
-  const min = step;
   const currentQty = Number(quantityInput.value) || min;
   let newQty = currentQty;
 
   const snapDown = v => {
+    if (!isFinite(v)) return min;
     if (v < min) return min;
     return Math.floor((v - min) / step) * step + min;
   };
 
   if (quantitySelector === 'decrease') {
-    if (currentQty > max) {
+    if (currentQty >= max && max % step !== 0) {
       newQty = snapDown(max);
     } else if (currentQty % step !== 0) {
       newQty = snapDown(currentQty);
