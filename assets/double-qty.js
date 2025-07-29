@@ -110,7 +110,8 @@
     var step = parseInt(input.getAttribute('data-min-qty'), 10) || 1;
     var min = parseInt(input.min, 10) || step;
     var max = input.max ? parseInt(input.max, 10) : Infinity;
-    var val = parseInt(input.value, 10) || min;
+    var val = parseInt(input.value, 10);
+    if(isNaN(val)) val = min;
 
     if(delta > 0 && isFinite(max) && val >= max){
       validateAndHighlightQty(input);
