@@ -8904,8 +8904,12 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   let newQty = currentQty;
 
   if (quantitySelector !== 'decrease' && isFinite(max) && currentQty >= max) {
-    quantityInput.classList.add('text-red-600');
-    quantityInput.style.color = '#e3342f';
+    if (typeof validateAndHighlightQty === 'function') {
+      validateAndHighlightQty(quantityInput);
+    } else {
+      quantityInput.classList.add('text-red-600');
+      quantityInput.style.color = '#e3342f';
+    }
     return;
   }
 
