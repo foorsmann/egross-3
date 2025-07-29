@@ -20,7 +20,7 @@
   outline: none;
 }
 
-/* Toate stările trebuie să arate identic cu starea normală */
+/* Toate stările - styling identic cu normalul */
 .double-qty-btn,
 .double-qty-btn:hover,
 .double-qty-btn:focus,
@@ -52,3 +52,4 @@
     padding: 0.4em 0.8em;
   }
 }
+
