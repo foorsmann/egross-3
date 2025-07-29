@@ -58,10 +58,11 @@
         <input type="hidden" name="id" value="{{ variant_id }}" data-selected-variant="{{ selected_variant_id }}" disabled>
         <div class="product-form__actions" data-cart-actions>
           {% if show_quantity_selector == true %}
-            <label class="prod__option-label prod__option-label__quantity font-medium">
+            <label for="{{ product_form_id }}-qty" class="prod__option-label prod__option-label__quantity font-medium">
               {{ 'products.product.quantity' | t }}
             </label>
           {% endif %}
+
           <div class="flex flex-wrap items-end">
             {% if show_quantity_selector == true %}
               <div class="form__input-wrapper form__input-wrapper--select mr-5 w-32" data-quantity-input-wrapper>
