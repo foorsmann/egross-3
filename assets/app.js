@@ -8904,11 +8904,17 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   let newQty = currentQty;
 
   if (quantitySelector !== 'decrease' && isFinite(max) && currentQty >= max) {
-    quantityInput.classList.add('text-red-600');
-    quantityInput.style.color = '#e3342f';
+    // Dacă e deja la maxim, doar colorează și validează fără a incrementa mai mult
+    if (typeof validateAndHighlightQty === 'function') {
+      validateAndHighlightQty(quantityInput);
+    } else {
+      quantityInput.classList.add('text-red-600');
+      quantityInput.style.color = '#e3342f';
+    }
     return;
   }
 
+  // LOGICA NORMALĂ DE INCREMENT/DECREMENT
   const snapDown = v => {
     if (!isFinite(v)) return min;
     if (v < min) return min;
