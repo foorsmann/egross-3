@@ -87,8 +87,21 @@
       var container = btn.closest('.quantity-input') || btn.parentNode;
       var input = container.querySelector('input[type="number"]');
       if(input){
-        // Tema gestionează deja incrementarea/decrementarea, noi doar validăm după
-        setTimeout(function(){ validateAndHighlightQty(input); }, 0);
+        var before = input.value;
+        setTimeout(function(){
+          if(input.value === before){
+            var action = btn.getAttribute('data-quantity-selector') || btn.getAttribute('data-qty-change');
+            if(action === 'increase' || action === 'inc'){
+              adjustQuantity(input, 1);
+            }else if(action === 'decrease' || action === 'dec'){
+              adjustQuantity(input, -1);
+            }else{
+              validateAndHighlightQty(input);
+            }
+          }else{
+            validateAndHighlightQty(input);
+          }
+        }, 0);
       }
     }, true);
   }
