@@ -104,7 +104,7 @@
         "00b3badd-1613-4230-85d8-f87f04306aaa"
       ],
       "settings": {
-        "container": "w-full",
+        "container": "container",
         "grid_layout": "grid",
         "grid_columns": "4",
         "show_columns_switcher": false,
