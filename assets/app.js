@@ -7445,6 +7445,7 @@ addEventDelegate({
   }
 });
 
+
 addEventDelegate({
   context: this.domNodes.cartDrawer,
   event: 'change',
@@ -8880,6 +8881,7 @@ _defineProperty(this, "handleQtyInputChange", e => {
 
   product_ConceptSGMEvents.emit(`${this.productData.id}__QUANTITY_CHANGE`, val, this);
 });
+
 
 _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   const { quantitySelector } = btn.dataset;
