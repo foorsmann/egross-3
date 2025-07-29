@@ -8904,6 +8904,7 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
   let newQty = currentQty;
 
   if (quantitySelector !== 'decrease' && isFinite(max) && currentQty >= max) {
+    // Dacă e deja la maxim, doar colorează și validează fără a incrementa mai mult
     if (typeof validateAndHighlightQty === 'function') {
       validateAndHighlightQty(quantityInput);
     } else {
@@ -8913,6 +8914,7 @@ _defineProperty(this, "handleQtyBtnClick", (e, btn) => {
     return;
   }
 
+  // LOGICA NORMALĂ DE INCREMENT/DECREMENT
   const snapDown = v => {
     if (!isFinite(v)) return min;
     if (v < min) return min;

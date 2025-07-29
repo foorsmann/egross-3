@@ -113,6 +113,7 @@
     var val = parseInt(input.value, 10);
     if(isNaN(val)) val = min;
 
+    // Increment: dacă suntem deja la maxim sau peste, doar validează și colorează, nu schimba valoarea!
     if(delta > 0 && isFinite(max) && val >= max){
       validateAndHighlightQty(input);
       return;
