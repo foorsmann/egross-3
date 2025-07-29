@@ -53,8 +53,8 @@
   window.validateAndHighlightQty = validateAndHighlightQty;
 
   var BUTTON_CLASS = 'double-qty-btn';
-  var LABEL_PREFIX = 'Adaugă ';
-  var LABEL_SUFFIX = ' bucăți';
+  var LABEL_PREFIX = 'Adauga inca ';
+  var LABEL_SUFFIX = '';
 
   function applyMinQty(){
     document.querySelectorAll('[data-min-qty]').forEach(function(input){
