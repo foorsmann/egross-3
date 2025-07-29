@@ -106,7 +106,7 @@
       "settings": {
         "container": "container",
         "grid_layout": "grid",
-        "grid_columns": "4",
+        "grid_columns": "3",
         "show_columns_switcher": false,
         "pagination_limit": 35,
         "paginate_type": "infinite",
