@@ -1,9 +1,6 @@
 /* Stiluri pentru butonul "Dublează" cantitate, responsive, focus, acțiune principală */
-/* Width is handled via Tailwind classes (flex-1 max-w-[160px]) */
-
-/* double-qty.css - Stiluri pentru butonul "Dublează" cantitate
-Autor: Saga Media / Egross
-Descriere: Stiluri responsive, accesibile, preia stilul principal al butoanelor de acțiune din temă. Modifică rapid variabilele dacă vrei alt aspect. */
+/* double-qty.css - Autor: Saga Media / Egross */
+/* Toate stările folosesc styling-ul normal, exclusiv pe variabile din temă */
 
 .double-qty-btn {
   display: inline-flex;
@@ -17,27 +14,42 @@ Descriere: Stiluri responsive, accesibile, preia stilul principal al butoanelor 
   border: var(--btn-border-width, 1px) solid var(--color-btn-secondary-border, var(--color-primary-darker));
   color: var(--color-btn-secondary-text, var(--color-body-text));
   border-radius: var(--btn-border-radius, 5px);
-  cursor: pointer;
   box-shadow: 0 1px 4px #00000014;
-  transition: transform 0.12s;
-}
-.double-qty-btn:is(:hover, :focus, :active, :disabled) {
-  background-color: inherit !important;
-  border-color: inherit !important;
-  border-width: inherit !important;
-  color: inherit !important;
-  border-radius: inherit !important;
-  box-shadow: inherit !important;
-  opacity: inherit !important;
-  cursor: inherit !important;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.12s;
   outline: none;
 }
-.double-qty-btn:active {
+
+/* Toate stările - styling identic cu normalul */
+.double-qty-btn,
+.double-qty-btn:hover,
+.double-qty-btn:focus,
+.double-qty-btn:active,
+.double-qty-btn:disabled {
+  background-color: transparent;
+  border: var(--btn-border-width, 1px) solid var(--color-btn-secondary-border, var(--color-primary-darker));
+  color: var(--color-btn-secondary-text, var(--color-body-text));
+  border-radius: var(--btn-border-radius, 5px);
+  box-shadow: 0 1px 4px #00000014;
+  outline: none;
+}
+
+/* Efect fizic de apăsare la click */
+.double-qty-btn:active:not(:disabled) {
   transform: scale(0.98);
 }
+
+/* Disabled styling */
+.double-qty-btn:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+/* Responsive: font și padding mai mic pe mobile */
 @media (max-width: 600px) {
   .double-qty-btn {
     font-size: 0.95em;
     padding: 0.4em 0.8em;
   }
 }
+
