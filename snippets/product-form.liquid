@@ -25,6 +25,10 @@
   if enableCardButton == nil
     assign enableCardButton = true
   endif
+
+  if show_double_qty_btn == nil
+    assign show_double_qty_btn = section.settings.show_double_qty_btn | default: false
+  endif
 -%}
 
 <div class="form__error-message-wrapper hidden" data-error-message-wrapper role="alert">
@@ -66,10 +70,7 @@
           <div class="flex flex-wrap items-end">
             {% if show_quantity_selector == true %}
               <div class="form__input-wrapper form__input-wrapper--select mr-5 w-32" data-quantity-input-wrapper>
-                {% comment %}
-                  FOLOSEȘTE PARAMETRUL CORECT DIN SECTION, NU BLOCK!
-                {% endcomment %}
-                {% render 'product-qty-input', product_form_id: product_form_id, show_double_qty_btn: section.settings.show_double_qty_btn %}
+                {% render 'product-qty-input', product_form_id: product_form_id, show_double_qty_btn: show_double_qty_btn %}
               </div>
             {% endif %}
             {% if enableCardButton %}
