@@ -52,9 +52,10 @@
 
   window.validateAndHighlightQty = validateAndHighlightQty;
 
-  var BUTTON_CLASS = 'double-qty-btn';
-  var LABEL_PREFIX = 'Adaugă încă ';
-  var LABEL_SUFFIX = '';
+var BUTTON_CLASS = 'double-qty-btn';
+var LABEL_PREFIX = 'Adauga inca '; // Recomand cu diacritice, UX mai bun
+var LABEL_SUFFIX = '';
+
 
   function applyMinQty(){
     document.querySelectorAll('[data-min-qty]').forEach(function(input){
