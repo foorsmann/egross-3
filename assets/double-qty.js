@@ -70,6 +70,20 @@
     });
   }
 
+  function syncOtherQtyInputs(changedInput){
+    var productId = changedInput.dataset.productId;
+    if(!productId) return;
+    var value = changedInput.value;
+    document.querySelectorAll('input[data-product-id="' + productId + '"][data-quantity-input]').forEach(function(input){
+      if(input === changedInput) return;
+      if(input.value !== value){
+        input.value = value;
+        validateAndHighlightQty(input);
+        updateIncreaseBtnState(input);
+      }
+    });
+  }
+
   function attachQtyInputListeners(){
     var selectors = '.quantity-input__element, .scd-item__qty_input, input[data-quantity-input]';
     document.querySelectorAll(selectors).forEach(function(input){
@@ -79,16 +93,19 @@
         input.addEventListener(ev, function(){
           validateAndHighlightQty(input);
           updateIncreaseBtnState(input);
+          syncOtherQtyInputs(input);
         });
       });
       input.addEventListener('keypress', function(e){
-        if(e.key === 'Enter'){ 
-          validateAndHighlightQty(input); 
-          updateIncreaseBtnState(input); 
+        if(e.key === 'Enter'){
+          validateAndHighlightQty(input);
+          updateIncreaseBtnState(input);
+          syncOtherQtyInputs(input);
         }
       });
       validateAndHighlightQty(input);
       updateIncreaseBtnState(input);
+      syncOtherQtyInputs(input);
     });
   }
 
