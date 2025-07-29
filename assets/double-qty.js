@@ -4,7 +4,9 @@
 
 (function(){
   // Funcție comună pentru validare și highlight roșu la atingerea stocului
+  // Round value down to the nearest valid multiple based on the minimum step
   function snapDown(val, step, min){
+    if(!isFinite(val)) return min;
     if(val < min) return min;
     return Math.floor((val - min) / step) * step + min;
   }
@@ -83,6 +85,7 @@
       var container = btn.closest('.quantity-input') || btn.parentNode;
       var input = container.querySelector('input[type="number"]');
       if(input){
+        // Tema gestionează deja incrementarea/decrementarea, noi doar validăm după
         setTimeout(function(){ validateAndHighlightQty(input); }, 0);
       }
     });
@@ -95,7 +98,7 @@
     var val = parseInt(input.value, 10) || min;
 
     if(delta < 0){
-      if(val > max){
+      if(isFinite(max) && val >= max){
         val = snapDown(max, step, min);
       }else if(val % step !== 0){
         val = snapDown(val, step, min);
