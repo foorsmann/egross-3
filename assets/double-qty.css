@@ -18,13 +18,16 @@ Descriere: Stiluri responsive, accesibile, preia stilul principal al butoanelor 
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.12s;
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 .double-qty-btn:focus {
   outline: 2px solid var(--color-primary, #222);
   outline-offset: 2px;
   box-shadow: 0 0 0 2px var(--color-primary, #222);
+}
+.double-qty-btn:active {
+  transform: scale(0.98);
 }
 .double-qty-btn:disabled {
   opacity: 0.5;
