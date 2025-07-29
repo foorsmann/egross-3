@@ -240,11 +240,45 @@ var LABEL_SUFFIX = '';
     });
   }
 
+  function adjustQtyAtcLayout(container){
+    var wrapper = container.querySelector('[data-quantity-input-wrapper]');
+    var atcBtn = container.querySelector('.add-to-cart');
+    if(!wrapper || !atcBtn) return;
+    var doubleBtn = container.querySelector('.double-qty-btn');
+    var visible = doubleBtn && doubleBtn.offsetParent !== null;
+    if(!visible){
+      wrapper.classList.remove('w-32','mr-5');
+      wrapper.classList.add('flex-1');
+      atcBtn.classList.add('flex-1');
+      container.classList.add('gap-2');
+    }else{
+      wrapper.classList.remove('flex-1');
+      if(!wrapper.classList.contains('w-32')) wrapper.classList.add('w-32');
+      if(!wrapper.classList.contains('mr-5')) wrapper.classList.add('mr-5');
+      atcBtn.classList.remove('flex-1');
+      container.classList.remove('gap-2');
+    }
+  }
+
+  function initQtyLayoutObservers(){
+    document.querySelectorAll('[data-quantity-input-wrapper]').forEach(function(wrapper){
+      var container = wrapper.closest('.flex.flex-wrap.items-end');
+      if(!container || container.dataset.qtyLayoutObserved) return;
+      container.dataset.qtyLayoutObserved = '1';
+      adjustQtyAtcLayout(container);
+      var observer = new MutationObserver(function(){
+        adjustQtyAtcLayout(container);
+      });
+      observer.observe(container, {childList:true, subtree:true, attributes:true, attributeFilter:['class','style']});
+    });
+  }
+
   function initAll(){
     applyMinQty();
     initDoubleQtyButtons();
     attachQtyInputListeners();
     attachQtyButtonListeners();
+    initQtyLayoutObservers();
   }
   document.addEventListener('DOMContentLoaded', initAll);
   window.addEventListener('shopify:section:load', initAll);
