@@ -6,6 +6,7 @@
   // Funcție comună pentru validare și highlight roșu la atingerea stocului
   // Round value down to the nearest valid multiple based on the minimum step
   function snapDown(val, step, min){
+    if(!isFinite(val)) return min;
     if(val < min) return min;
     return Math.floor((val - min) / step) * step + min;
   }
@@ -96,7 +97,7 @@
     var val = parseInt(input.value, 10) || min;
 
     if(delta < 0){
-      if(val >= max){
+      if(isFinite(max) && val >= max){
         val = snapDown(max, step, min);
       }else if(val % step !== 0){
         val = snapDown(val, step, min);
