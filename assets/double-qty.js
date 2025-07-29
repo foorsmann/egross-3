@@ -112,6 +112,11 @@
     var max = input.max ? parseInt(input.max, 10) : Infinity;
     var val = parseInt(input.value, 10) || min;
 
+    if(delta > 0 && isFinite(max) && val >= max){
+      validateAndHighlightQty(input);
+      return;
+    }
+
     if(delta < 0){
       // Pentru decremente, când suntem la max și nu e multiplu, snapDown pe max!
       if(isFinite(max) && val >= max){
